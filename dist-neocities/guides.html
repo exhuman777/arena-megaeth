@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Arena Survival - How to Play</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0808 50%, #0a0a0a 100%);
+      color: #fff;
+      font-family: monospace;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .nav {
+      background: #111;
+      border-bottom: 1px solid #333;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav .logo { color: #f44; font-size: 20px; text-decoration: none; }
+    .nav .links a {
+      color: #888;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+    .nav .links a:hover { color: #f80; }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    h1 {
+      color: #f80;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 40px;
+    }
+
+    .guide-section {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+    .guide-section h2 {
+      color: #f80;
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .guide-section h2 .icon { font-size: 24px; }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .control-group h3 {
+      color: #ff0;
+      margin: 0 0 15px 0;
+      font-size: 14px;
+    }
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 12px;
+    }
+    .key {
+      background: linear-gradient(180deg, #333, #222);
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 8px 12px;
+      min-width: 50px;
+      text-align: center;
+      color: #fff;
+      font-weight: bold;
+    }
+    .key-desc { color: #aaa; }
+
+    .tip-box {
+      background: rgba(255,136,0,0.1);
+      border-left: 3px solid #f80;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .tip-box strong { color: #f80; }
+
+    .monster-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .monster-item {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .monster-item .icon { font-size: 24px; }
+    .monster-item .info { flex: 1; }
+    .monster-item .name { color: #fff; font-size: 13px; }
+    .monster-item .desc { color: #666; font-size: 11px; }
+
+    .item-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .item-card {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+    }
+    .item-card .icon { font-size: 28px; margin-bottom: 8px; }
+    .item-card .name { color: #fff; font-size: 12px; margin-bottom: 4px; }
+    .item-card .effect { color: #4f4; font-size: 11px; }
+
+    .strategy-list {
+      list-style: none;
+      padding: 0;
+    }
+    .strategy-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid #222;
+      display: flex;
+      gap: 10px;
+    }
+    .strategy-list li:last-child { border-bottom: none; }
+    .strategy-list .num {
+      background: #f44;
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .footer {
+      background: #0a0a0a;
+      border-top: 1px solid #222;
+      padding: 20px;
+      text-align: center;
+      color: #444;
+      font-size: 12px;
+      margin-top: 40px;
+    }
+    .footer a { color: #666; text-decoration: none; margin: 0 10px; }
+    .footer a:hover { color: #f80; }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="index.html" class="logo">⚔️ ARENA SURVIVAL</a>
+    <div class="links">
+      <a href="hub.html">Play</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="guides.html">Guides</a>
+      <a href="about.html">About</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>📖 HOW TO PLAY</h1>
+    <p class="subtitle">Master the arena and become a legend</p>
+
+    <!-- CONTROLS -->
+    <div class="guide-section">
+      <h2><span class="icon">🎮</span> Controls</h2>
+      <div class="controls-grid">
+        <div class="control-group">
+          <h3>WASD LAYOUT</h3>
+          <div class="control-item">
+            <span class="key">WASD</span>
+            <span class="key-desc">Move your warrior</span>
+          </div>
+          <div class="control-item">
+            <span class="key">H</span>
+            <span class="key-desc">Attack nearby enemy</span>
+          </div>
+          <div class="control-item">
+            <span class="key">J</span>
+            <span class="key-desc">AOE attack (area damage)</span>
+          </div>
+          <div class="control-item">
+            <span class="key">K</span>
+            <span class="key-desc">Pick up items</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <h3>ARROW LAYOUT</h3>
+          <div class="control-item">
+            <span class="key">↑↓←→</span>
+            <span class="key-desc">Move your warrior</span>
+          </div>
+          <div class="control-item">
+            <span class="key">X</span>
+            <span class="key-desc">Attack nearby enemy</span>
+          </div>
+          <div class="control-item">
+            <span class="key">C</span>
+            <span class="key-desc">AOE attack (area damage)</span>
+          </div>
+          <div class="control-item">
+            <span class="key">V</span>
+            <span class="key-desc">Pick up items</span>
+          </div>
+        </div>
+      </div>
+      <div class="control-item" style="margin-top:15px;">
+        <span class="key">SPACE</span>
+        <span class="key-desc">Attack (works with both layouts) / Restart after death</span>
+      </div>
+      <div class="control-item">
+        <span class="key">P</span>
+        <span class="key-desc">Pause game</span>
+      </div>
+    </div>
+
+    <!-- GAMEPLAY -->
+    <div class="guide-section">
+      <h2><span class="icon">⚔️</span> Gameplay Basics</h2>
+      <p>Survive endless waves of monsters in the arena. Each wave brings stronger enemies.</p>
+
+      <div class="tip-box">
+        <strong>TIP:</strong> Walking into an enemy automatically attacks them. Use attack keys for quick strikes without moving.
+      </div>
+
+      <h3 style="color:#ff0;margin-top:20px;">Combat System</h3>
+      <ul style="color:#aaa;line-height:1.8;">
+        <li><strong style="color:#f44;">Critical Hits</strong> - Deal extra damage with a chance on each attack</li>
+        <li><strong style="color:#f80;">Combo System</strong> - Kill enemies quickly to build combos for bonus XP</li>
+        <li><strong style="color:#4cf;">Chain Lightning</strong> - Critical hits can chain to nearby enemies</li>
+        <li><strong style="color:#f80;">AOE Attack</strong> - Damages all enemies within 2 tiles (3 second cooldown)</li>
+      </ul>
+
+      <h3 style="color:#ff0;margin-top:20px;">Combo Milestones</h3>
+      <p style="color:#aaa;">Build combos by killing enemies quickly:</p>
+      <ul style="color:#aaa;line-height:1.8;">
+        <li><strong style="color:#f60;">5x</strong> - RAMPAGE</li>
+        <li><strong style="color:#f80;">10x</strong> - KILLING SPREE</li>
+        <li><strong style="color:#fa0;">15x</strong> - DOMINATING</li>
+        <li><strong style="color:#ff0;">20x</strong> - GODLIKE</li>
+        <li><strong style="color:#f0f;">30x</strong> - LEGENDARY</li>
+      </ul>
+    </div>
+
+    <!-- MONSTERS -->
+    <div class="guide-section">
+      <h2><span class="icon">👹</span> Monsters</h2>
+      <p style="margin-bottom:15px;">Different monsters appear as waves progress:</p>
+      <div class="monster-list">
+        <div class="monster-item">
+          <div class="icon">🐀</div>
+          <div class="info">
+            <div class="name">Goblin</div>
+            <div class="desc">Fast, weak. Wave 1+</div>
+          </div>
+        </div>
+        <div class="monster-item">
+          <div class="icon">🦇</div>
+          <div class="info">
+            <div class="name">Bat</div>
+            <div class="desc">Erratic movement. Wave 1+</div>
+          </div>
+        </div>
+        <div class="monster-item">
+          <div class="icon">👿</div>
+          <div class="info">
+            <div class="name">Imp</div>
+            <div class="desc">Aggressive chaser. Wave 2+</div>
+          </div>
+        </div>
+        <div class="monster-item">
+          <div class="icon">💀</div>
+          <div class="info">
+            <div class="name">Skeleton</div>
+            <div class="desc">Cautious fighter. Wave 3+</div>
+          </div>
+        </div>
+        <div class="monster-item">
+          <div class="icon">👹</div>
+          <div class="info">
+            <div class="name">Orc</div>
+            <div class="desc">Strong & aggressive. Wave 4+</div>
+          </div>
+        </div>
+        <div class="monster-item">
+          <div class="icon">🦍</div>
+          <div class="info">
+            <div class="name">Ogre</div>
+            <div class="desc">Slow but powerful. Wave 6+</div>
+          </div>
+        </div>
+        <div class="monster-item">
+          <div class="icon">🧟</div>
+          <div class="info">
+            <div class="name">Giant Zombie</div>
+            <div class="desc">Massive HP. Wave 7+</div>
+          </div>
+        </div>
+        <div class="monster-item">
+          <div class="icon">👻</div>
+          <div class="info">
+            <div class="name">Giant</div>
+            <div class="desc">Boss tier. Wave 8+</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ITEMS -->
+    <div class="guide-section">
+      <h2><span class="icon">🎒</span> Items & Equipment</h2>
+      <p style="margin-bottom:15px;">Collect loot dropped by enemies:</p>
+
+      <h3 style="color:#f44;margin-bottom:10px;">Weapons</h3>
+      <p style="color:#aaa;margin-bottom:15px;">Increase your damage. Higher tier weapons drop at higher waves.</p>
+
+      <h3 style="color:#4af;margin-bottom:10px;">Armor</h3>
+      <p style="color:#aaa;margin-bottom:15px;">Reduce incoming damage. Equip better armor as you progress.</p>
+
+      <h3 style="color:#4f4;margin-bottom:10px;">Potions</h3>
+      <div class="item-list">
+        <div class="item-card">
+          <div class="icon">❤️</div>
+          <div class="name">Health Potion</div>
+          <div class="effect">Restore HP</div>
+        </div>
+        <div class="item-card">
+          <div class="icon">💨</div>
+          <div class="name">Speed Potion</div>
+          <div class="effect">Move faster</div>
+        </div>
+        <div class="item-card">
+          <div class="icon">💪</div>
+          <div class="name">Strength Potion</div>
+          <div class="effect">+50% damage</div>
+        </div>
+        <div class="item-card">
+          <div class="icon">🛡️</div>
+          <div class="name">Shield Potion</div>
+          <div class="effect">Temporary armor</div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <strong>TIP:</strong> Potions are auto-collected when you walk over them. Weapons and armor require manual pickup.
+      </div>
+    </div>
+
+    <!-- PROGRESSION -->
+    <div class="guide-section">
+      <h2><span class="icon">📈</span> Progression</h2>
+      <p>Your warrior persists between games:</p>
+      <ul style="color:#aaa;line-height:1.8;">
+        <li><strong style="color:#4af;">Level Up</strong> - Gain XP from kills. Higher combos = more XP</li>
+        <li><strong style="color:#ff0;">Gold</strong> - Earned from kills and achievements</li>
+        <li><strong style="color:#f80;">Training</strong> - Spend gold to permanently upgrade HP, Damage, Defense</li>
+        <li><strong style="color:#4f4;">Achievements</strong> - Complete challenges for gold rewards</li>
+        <li><strong style="color:#f44;">Inventory</strong> - Keep items between games, equip your best gear</li>
+      </ul>
+    </div>
+
+    <!-- STRATEGIES -->
+    <div class="guide-section">
+      <h2><span class="icon">🧠</span> Pro Tips</h2>
+      <ul class="strategy-list">
+        <li>
+          <span class="num">1</span>
+          <span>Kite enemies by moving away while attacking. Don't let them surround you.</span>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <span>Save AOE attack for when multiple enemies cluster together.</span>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <span>Prioritize killing weaker enemies to build combo before fighting toughs.</span>
+        </li>
+        <li>
+          <span class="num">4</span>
+          <span>Pick up health potions immediately when low HP.</span>
+        </li>
+        <li>
+          <span class="num">5</span>
+          <span>Invest gold in Training upgrades - they're permanent.</span>
+        </li>
+        <li>
+          <span class="num">6</span>
+          <span>Use arena corners to avoid being surrounded.</span>
+        </li>
+        <li>
+          <span class="num">7</span>
+          <span>Critical chain lightning can clear groups - maximize crit chance!</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="index.html">Home</a> |
+    <a href="leaderboard.html">Leaderboard</a> |
+    <a href="guides.html">Guides</a> |
+    <a href="about.html">About</a>
+  </div>
+</body>
+</html>

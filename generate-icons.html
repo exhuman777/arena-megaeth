@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Icon Generator</title>
+</head>
+<body>
+  <h2>Right-click each icon and "Save Image As"</h2>
+  <p>icon-192.png:</p>
+  <canvas id="icon192" width="192" height="192"></canvas>
+  <p>icon-512.png:</p>
+  <canvas id="icon512" width="512" height="512"></canvas>
+
+  <script>
+    function drawIcon(canvas) {
+      const ctx = canvas.getContext('2d');
+      const size = canvas.width;
+      const scale = size / 192;
+
+      // Background
+      const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+      grad.addColorStop(0, '#331100');
+      grad.addColorStop(1, '#110000');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+
+      // Border glow
+      ctx.strokeStyle = '#ff2200';
+      ctx.lineWidth = 8 * scale;
+      ctx.shadowColor = '#ff2200';
+      ctx.shadowBlur = 20 * scale;
+      ctx.strokeRect(10*scale, 10*scale, size-20*scale, size-20*scale);
+
+      // Sword
+      ctx.shadowBlur = 10 * scale;
+      ctx.shadowColor = '#ffffff';
+      ctx.fillStyle = '#cccccc';
+      ctx.beginPath();
+      ctx.moveTo(96*scale, 30*scale);  // tip
+      ctx.lineTo(106*scale, 110*scale);
+      ctx.lineTo(96*scale, 115*scale);
+      ctx.lineTo(86*scale, 110*scale);
+      ctx.closePath();
+      ctx.fill();
+
+      // Guard
+      ctx.fillStyle = '#ffcc00';
+      ctx.fillRect(76*scale, 110*scale, 40*scale, 10*scale);
+
+      // Handle
+      ctx.fillStyle = '#8b4513';
+      ctx.fillRect(91*scale, 120*scale, 10*scale, 35*scale);
+
+      // Pommel
+      ctx.fillStyle = '#ffcc00';
+      ctx.beginPath();
+      ctx.arc(96*scale, 160*scale, 8*scale, 0, Math.PI*2);
+      ctx.fill();
+
+      // "A" letter
+      ctx.shadowBlur = 0;
+      ctx.font = `bold ${48*scale}px monospace`;
+      ctx.fillStyle = '#ff2200';
+      ctx.textAlign = 'center';
+      ctx.fillText('A', 50*scale, 180*scale);
+      ctx.fillText('S', 142*scale, 180*scale);
+    }
+
+    drawIcon(document.getElementById('icon192'));
+    drawIcon(document.getElementById('icon512'));
+  </script>
+</body>
+</html>

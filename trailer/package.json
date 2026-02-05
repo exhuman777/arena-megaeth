@@ -1,0 +1,24 @@
+{
+  "name": "arena-survival-trailer",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "remotion studio src/index.ts",
+    "preview": "remotion preview src/index.ts",
+    "render": "remotion render src/index.ts FullTrailer out/trailer.mp4",
+    "render-intro": "remotion render src/index.ts Intro out/intro.mp4",
+    "render-gameplay": "remotion render src/index.ts GameplayMontage out/gameplay.mp4",
+    "render-tiktok": "remotion render src/index.ts TikTok out/tiktok.mp4"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.409",
+    "@remotion/cli": "^4.0.409",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "remotion": "^4.0.409"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "typescript": "^5.0.0"
+  }
+}

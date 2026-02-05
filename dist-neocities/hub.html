@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Arena Survival - Warrior's Quarters</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1010 50%, #0a0a0a 100%);
+      color: #fff;
+      font-family: monospace;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Pixel icon helper */
+    .icon32 {
+      width: 32px;
+      height: 32px;
+      display: inline-block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      vertical-align: middle;
+    }
+    .icon24 {
+      width: 24px;
+      height: 24px;
+      display: inline-block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      vertical-align: middle;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: linear-gradient(180deg, #1a1a1a, #111);
+      border-bottom: 2px solid #f44;
+      margin-bottom: 20px;
+    }
+    .header .title {
+      color: #f44;
+      font-size: 24px;
+      text-shadow: 0 0 10px #f00;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header .gold-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(180deg, #332, #221);
+      padding: 8px 15px;
+      border-radius: 6px;
+      border: 1px solid #550;
+    }
+    .header .gold-value { color: #ff0; font-size: 18px; }
+    .header .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .header .username { color: #f80; }
+    .header button {
+      padding: 8px 15px;
+      background: #333;
+      border: 1px solid #555;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .header button:hover { background: #444; }
+
+    /* Auth forms */
+    .auth-panel {
+      max-width: 400px;
+      margin: 80px auto;
+      background: linear-gradient(180deg, #1a1a1a, #111);
+      padding: 30px;
+      border-radius: 12px;
+      border: 2px solid #333;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .auth-panel h2 {
+      color: #f80;
+      margin-top: 0;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .auth-panel input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      color: #fff;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+    .auth-panel input:focus {
+      outline: none;
+      border-color: #f80;
+    }
+    .auth-panel button {
+      width: 100%;
+      padding: 14px;
+      margin: 12px 0;
+      background: linear-gradient(180deg, #f44, #c22);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 16px;
+      font-family: monospace;
+    }
+    .auth-panel button:hover { background: linear-gradient(180deg, #f66, #d33); }
+    .auth-panel .switch { color: #888; text-align: center; cursor: pointer; }
+    .auth-panel .switch:hover { color: #f80; }
+    .auth-panel .error { color: #f44; text-align: center; }
+
+    /* Hub layout */
+    .hub { display: none; }
+    .hub.active { display: block; }
+
+    /* Navigation tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      background: #111;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .nav-tab {
+      padding: 12px 20px;
+      background: linear-gradient(180deg, #222, #1a1a1a);
+      border: 1px solid #333;
+      color: #888;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-tab:hover { background: linear-gradient(180deg, #2a2a2a, #222); color: #fff; border-color: #444; }
+    .nav-tab.active { background: linear-gradient(180deg, #f44, #c22); border-color: #f66; color: #fff; }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* Panel styles */
+    .panel {
+      background: linear-gradient(180deg, #1a1a1a, #111);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      margin-bottom: 20px;
+    }
+    .panel h3 {
+      color: #f80;
+      margin-top: 0;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Main hub grid */
+    .hub-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+    }
+
+    /* Character panel */
+    .char-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #222;
+    }
+    .char-stat .label {
+      color: #888;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .char-stat .value { color: #fff; font-size: 16px; }
+    .char-stat .value.gold { color: #ff0; }
+    .char-stat .value.level { color: #4af; }
+
+    .xp-bar {
+      background: #111;
+      height: 24px;
+      border-radius: 12px;
+      margin: 12px 0;
+      overflow: hidden;
+      border: 1px solid #333;
+      position: relative;
+    }
+    .xp-bar .fill {
+      background: linear-gradient(90deg, #4af, #48f);
+      height: 100%;
+      transition: width 0.3s;
+      box-shadow: 0 0 10px #4af;
+    }
+    .xp-bar .text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 11px;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    /* Equipped slots */
+    .equipped-slots {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .equip-slot {
+      background: linear-gradient(180deg, #1a1a1a, #111);
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .equip-slot.filled { border-color: #f80; }
+    .equip-slot .slot-icon {
+      width: 48px;
+      height: 48px;
+      background: #0a0a0a;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .equip-slot .slot-info { flex: 1; }
+    .equip-slot .slot-type { color: #666; font-size: 10px; text-transform: uppercase; }
+    .equip-slot .slot-name { color: #fff; font-size: 12px; }
+    .equip-slot .slot-stats { color: #4f4; font-size: 11px; }
+
+    /* Play button */
+    .play-btn {
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(180deg, #f44, #c22);
+      border: 2px solid #f66;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: monospace;
+    }
+    .play-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255,68,68,0.5);
+    }
+    .play-btn:disabled {
+      background: linear-gradient(180deg, #444, #333);
+      border-color: #555;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .free-rounds-display {
+      background: linear-gradient(180deg, #222, #1a1a1a);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .free-rounds-display .free { color: #4f4; }
+    .free-rounds-display .paid { color: #f80; }
+    .free-rounds-display .none { color: #f44; }
+
+    .play-cost {
+      text-align: center;
+      color: #666;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    /* Inventory grid */
+    .inv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .inv-item {
+      background: linear-gradient(180deg, #1a1a1a, #111);
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .inv-item:hover { border-color: #555; transform: translateY(-1px); }
+    .inv-item.equipped { border-color: #f80; background: linear-gradient(180deg, #2a1a0a, #1a0a00); }
+    .inv-item.rarity-uncommon { border-color: #4f4; }
+    .inv-item.rarity-rare { border-color: #44f; }
+    .inv-item.rarity-epic { border-color: #a4f; }
+    .inv-item.rarity-legendary { border-color: #fa0; box-shadow: 0 0 10px rgba(255,170,0,0.3); }
+    .inv-item .item-icon {
+      width: 48px;
+      height: 48px;
+      background: #0a0a0a;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .inv-item .item-info { flex: 1; min-width: 0; }
+    .inv-item .item-name { color: #fff; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inv-item .item-stats { color: #888; font-size: 11px; }
+    .inv-item .item-rarity { font-size: 10px; }
+    .inv-item .item-actions { display: flex; flex-direction: column; gap: 4px; }
+    .inv-item button {
+      padding: 6px 10px;
+      font-size: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: monospace;
+    }
+    .inv-item .equip-btn { background: #4a4; color: #fff; }
+    .inv-item .sell-btn { background: #a44; color: #fff; }
+    .inv-item .unequip-btn { background: #666; color: #fff; }
+
+    /* Training */
+    .training-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+    }
+    .training-card {
+      background: linear-gradient(180deg, #1a1a1a, #111);
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 25px;
+      text-align: center;
+    }
+    .training-card .stat-icon { margin-bottom: 10px; }
+    .training-card .stat-name { color: #f80; font-size: 16px; margin-bottom: 8px; }
+    .training-card .stat-value { color: #fff; font-size: 36px; margin-bottom: 5px; }
+    .training-card .stat-increase { color: #4f4; font-size: 14px; margin-bottom: 15px; }
+    .training-card button {
+      padding: 12px 24px;
+      background: linear-gradient(180deg, #f80, #c60);
+      border: none;
+      color: #000;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 0 auto;
+    }
+    .training-card button:disabled { background: linear-gradient(180deg, #444, #333); color: #666; cursor: not-allowed; }
+
+    /* Shop */
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    .shop-item {
+      background: linear-gradient(180deg, #1a1a1a, #111);
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .shop-item:hover { border-color: #555; transform: translateY(-2px); }
+    .shop-item .item-icon { margin-bottom: 10px; }
+    .shop-item .item-name { color: #fff; font-size: 14px; margin-bottom: 5px; }
+    .shop-item .item-stats { color: #888; font-size: 12px; margin-bottom: 10px; }
+    .shop-item .item-price {
+      color: #ff0;
+      font-size: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .shop-item button {
+      padding: 10px 24px;
+      background: linear-gradient(180deg, #4a4, #383);
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: monospace;
+    }
+    .shop-item button:disabled { background: linear-gradient(180deg, #444, #333); color: #666; cursor: not-allowed; }
+
+    /* Achievements */
+    .ach-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 12px;
+    }
+    .ach-item {
+      background: linear-gradient(180deg, #1a1a1a, #111);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .ach-item.locked { opacity: 0.5; }
+    .ach-item.unlocked { border-color: #f80; }
+    .ach-item.claimed { border-color: #4a4; background: linear-gradient(180deg, #1a2a1a, #0a1a0a); }
+    .ach-item .ach-icon {
+      width: 48px;
+      height: 48px;
+      background: #0a0a0a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ach-item.unlocked .ach-icon { background: linear-gradient(180deg, #f80, #c60); }
+    .ach-item.claimed .ach-icon { background: linear-gradient(180deg, #4a4, #383); }
+    .ach-item .ach-info { flex: 1; }
+    .ach-item .ach-name { color: #fff; font-size: 14px; margin-bottom: 3px; }
+    .ach-item .ach-desc { color: #888; font-size: 12px; margin-bottom: 3px; }
+    .ach-item .ach-reward { color: #ff0; font-size: 11px; display: flex; align-items: center; gap: 4px; }
+    .ach-item button {
+      padding: 8px 16px;
+      background: linear-gradient(180deg, #f80, #c60);
+      border: none;
+      color: #000;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: monospace;
+    }
+
+    /* Leaderboard */
+    .lb-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .lb-table th, .lb-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #222;
+    }
+    .lb-table th { color: #f80; background: #1a1a1a; }
+    .lb-table tr:hover { background: rgba(255,136,0,0.1); }
+    .lb-table .rank { width: 50px; }
+    .lb-table .rank-1 { color: #ffd700; }
+    .lb-table .rank-2 { color: #c0c0c0; }
+    .lb-table .rank-3 { color: #cd7f32; }
+    .lb-table .score { color: #ff0; }
+
+    .lb-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .lb-tabs button {
+      padding: 10px 20px;
+      background: linear-gradient(180deg, #222, #1a1a1a);
+      border: 1px solid #333;
+      color: #888;
+      cursor: pointer;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+    .lb-tabs button.active { background: linear-gradient(180deg, #f44, #c22); border-color: #f66; color: #fff; }
+
+    .empty-message {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .stat-box {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-box .stat-value { color: #fff; font-size: 20px; }
+    .stat-box .stat-label { color: #666; font-size: 10px; }
+  </style>
+</head>
+<body>
+  <!-- Auth Panel -->
+  <div class="auth-panel" id="authPanel">
+    <div id="loginForm">
+      <h2><img src="assets/icons32/fb920.png" class="icon32"> Warrior Login</h2>
+      <input type="text" id="loginUsername" placeholder="Username">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <button onclick="login()">Enter Quarters</button>
+      <p class="error" id="loginError"></p>
+      <p class="switch" onclick="showRegister()">Don't have an account? Register</p>
+      <hr style="margin:20px 0;border-color:#333;">
+      <button onclick="playAsGuest()" style="background:#444;width:100%;">Play as Guest</button>
+      <p style="color:#666;font-size:11px;margin-top:8px;">No server? Progress saved locally.</p>
+    </div>
+
+    <div id="registerForm" style="display:none;">
+      <h2><img src="assets/icons32/fb5.png" class="icon32"> Create Warrior</h2>
+      <input type="text" id="regUsername" placeholder="Username">
+      <input type="email" id="regEmail" placeholder="Email (optional)">
+      <input type="password" id="regPassword" placeholder="Password">
+      <button onclick="register()">Create Account</button>
+      <p class="error" id="regError"></p>
+      <p class="switch" onclick="showLogin()">Already have an account? Login</p>
+    </div>
+  </div>
+
+  <!-- Hub -->
+  <div class="hub" id="hub">
+    <div class="header">
+      <div class="title">
+        <img src="assets/icons32/fb920.png" class="icon32">
+        ARENA SURVIVAL
+      </div>
+      <div class="user-info">
+        <div class="gold-display">
+          <img src="assets/icons32/fb940.png" class="icon24">
+          <span class="gold-value" id="headerGold">0</span>
+        </div>
+        <span class="username">Welcome, <span id="playerName">Warrior</span></span>
+        <button onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="nav-tabs">
+        <div class="nav-tab active" onclick="showSection('home')">
+          <img src="assets/icons32/fb5.png" class="icon24"> Home
+        </div>
+        <div class="nav-tab" onclick="showSection('inventory')">
+          <img src="assets/icons32/fb30.png" class="icon24"> Inventory
+        </div>
+        <div class="nav-tab" onclick="showSection('training')">
+          <img src="assets/icons32/fb920.png" class="icon24"> Training
+        </div>
+        <div class="nav-tab" onclick="showSection('shop')">
+          <img src="assets/icons32/fb940.png" class="icon24"> Shop
+        </div>
+        <div class="nav-tab" onclick="showSection('achievements')">
+          <img src="assets/icons32/fb60.png" class="icon24"> Trophies
+        </div>
+        <div class="nav-tab" onclick="showSection('leaderboard')">
+          <img src="assets/icons32/fb60.png" class="icon24"> Leaderboard
+        </div>
+      </div>
+
+      <!-- HOME SECTION -->
+      <div class="section active" id="homeSection">
+        <div class="hub-grid">
+          <div>
+            <div class="panel">
+              <h3><img src="assets/icons32/fb5.png" class="icon24"> Character</h3>
+              <div class="char-stat">
+                <span class="label"><img src="assets/icons32/fb950.png" class="icon24"> Level</span>
+                <span class="value level" id="charLevel">1</span>
+              </div>
+              <div class="xp-bar">
+                <div class="fill" id="xpFill" style="width:0%"></div>
+                <div class="text"><span id="charXp">0</span> / <span id="charXpNeeded">100</span> XP</div>
+              </div>
+              <div class="char-stat">
+                <span class="label"><img src="assets/icons32/fb3.png" class="icon24"> Max HP</span>
+                <span class="value" id="charHp">100</span>
+              </div>
+              <div class="char-stat">
+                <span class="label"><img src="assets/icons32/fb920.png" class="icon24"> Damage</span>
+                <span class="value" id="charDamage">8</span>
+              </div>
+              <div class="char-stat">
+                <span class="label"><img src="assets/icons32/fb650.png" class="icon24"> Defense</span>
+                <span class="value" id="charDefense">0</span>
+              </div>
+
+              <div class="equipped-slots">
+                <div class="equip-slot" id="eqWeaponSlot">
+                  <div class="slot-icon"><img src="assets/icons32/fb920.png" class="icon32"></div>
+                  <div class="slot-info">
+                    <div class="slot-type">Weapon</div>
+                    <div class="slot-name" id="eqWeaponName">None</div>
+                    <div class="slot-stats" id="eqWeaponStats"></div>
+                  </div>
+                </div>
+                <div class="equip-slot" id="eqArmorSlot">
+                  <div class="slot-icon"><img src="assets/icons32/fb100.png" class="icon32"></div>
+                  <div class="slot-info">
+                    <div class="slot-type">Armor</div>
+                    <div class="slot-name" id="eqArmorName">None</div>
+                    <div class="slot-stats" id="eqArmorStats"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="free-rounds-display" id="freeRoundsDisplay">
+                <span id="freeRoundsText">Loading...</span>
+              </div>
+              <button class="play-btn" onclick="playGame()" id="playBtn">
+                <img src="assets/icons32/fb920.png" class="icon32"> ENTER ARENA
+              </button>
+              <p class="play-cost" id="playCost"></p>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <h3><img src="assets/icons32/fb10.png" class="icon24"> Battle Stats</h3>
+              <div class="stats-grid">
+                <div class="stat-box">
+                  <div class="stat-value" id="charKills">0</div>
+                  <div class="stat-label">TOTAL KILLS</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value" id="charGames">0</div>
+                  <div class="stat-label">GAMES PLAYED</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value" id="charBestScore">0</div>
+                  <div class="stat-label">BEST SCORE</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value" id="charBestWave">0</div>
+                  <div class="stat-label">BEST WAVE</div>
+                </div>
+              </div>
+              <div class="char-stat" style="margin-top:15px;">
+                <span class="label"><img src="assets/icons32/fb500.png" class="icon24"> Playtime</span>
+                <span class="value" id="charPlaytime">0h 0m</span>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h3><img src="assets/icons32/fb60.png" class="icon24"> Top Players</h3>
+              <div id="leaderboardPreview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVENTORY SECTION -->
+      <div class="section" id="inventorySection">
+        <div class="panel">
+          <h3><img src="assets/icons32/fb30.png" class="icon24"> Inventory</h3>
+          <div class="inv-grid" id="inventoryGrid"></div>
+          <div class="empty-message" id="emptyInventory">
+            <p>Your inventory is empty.<br>Fight in the arena and keep rare loot!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRAINING SECTION -->
+      <div class="section" id="trainingSection">
+        <div class="panel">
+          <h3><img src="assets/icons32/fb920.png" class="icon24"> Training Grounds</h3>
+          <p style="color:#888;margin-bottom:20px;">Spend gold to permanently upgrade your warrior.</p>
+          <div class="training-grid" id="trainingGrid"></div>
+        </div>
+      </div>
+
+      <!-- SHOP SECTION -->
+      <div class="section" id="shopSection">
+        <div class="panel">
+          <h3><img src="assets/icons32/fb940.png" class="icon24"> Merchant</h3>
+          <p style="color:#888;margin-bottom:20px;">Your gold: <span style="color:#ff0;" id="shopGold">0</span></p>
+          <div class="shop-grid" id="shopGrid"></div>
+        </div>
+      </div>
+
+      <!-- ACHIEVEMENTS SECTION -->
+      <div class="section" id="achievementsSection">
+        <div class="panel">
+          <h3><img src="assets/icons32/fb60.png" class="icon24"> Trophy Hall</h3>
+          <p style="color:#888;margin-bottom:20px;">Complete challenges to earn gold!</p>
+          <div class="ach-grid" id="achievementsGrid"></div>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD SECTION -->
+      <div class="section" id="leaderboardSection">
+        <div class="panel">
+          <h3><img src="assets/icons32/fb60.png" class="icon24"> Leaderboard</h3>
+          <div class="lb-tabs">
+            <button class="active" onclick="loadLeaderboard('score', this)">By Score</button>
+            <button onclick="loadLeaderboard('wave', this)">By Wave</button>
+            <button onclick="loadLeaderboard('kills', this)">By Kills</button>
+          </div>
+          <table class="lb-table">
+            <thead><tr><th class="rank">#</th><th>Player</th><th>Level</th><th>Score</th><th>Wave</th><th>Kills</th></tr></thead>
+            <tbody id="leaderboardBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3001/api';
+    let token = localStorage.getItem('arenaToken');
+    let user = JSON.parse(localStorage.getItem('arenaUser') || 'null');
+    let character = null;
+    let inventory = [];
+    let gameAccess = null;
+
+    // Check for guest mode or logged in
+    let isGuest = localStorage.getItem('arenaGuest') === 'true';
+    if (token && user) showHub();
+    else if (isGuest) playAsGuest();
+
+    function playAsGuest() {
+      isGuest = true;
+      localStorage.setItem('arenaGuest', 'true');
+      user = { username: 'Guest', id: 'guest' };
+      token = null;
+
+      // Load guest character from localStorage
+      let guestChar = localStorage.getItem('arenaGuestCharacter');
+      if (guestChar) {
+        character = JSON.parse(guestChar);
+      } else {
+        character = {
+          level: 1,
+          xp: 0,
+          gold: 0,
+          total_kills: 0,
+          highest_wave: 0,
+          highest_score: 0,
+          games_played: 0,
+          max_hp: 120,
+          base_damage: 5,
+          base_defense: 0
+        };
+        localStorage.setItem('arenaGuestCharacter', JSON.stringify(character));
+      }
+
+      // Load guest inventory
+      let guestInv = localStorage.getItem('arenaGuestInventory');
+      inventory = guestInv ? JSON.parse(guestInv) : [];
+
+      showHub();
+    }
+
+    function saveGuestProgress() {
+      if (isGuest && character) {
+        localStorage.setItem('arenaGuestCharacter', JSON.stringify(character));
+        localStorage.setItem('arenaGuestInventory', JSON.stringify(inventory));
+      }
+    }
+
+    function showLogin() {
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('registerForm').style.display = 'none';
+    }
+
+    function showRegister() {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('registerForm').style.display = 'block';
+    }
+
+    async function login() {
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+      try {
+        const res = await fetch(`${API}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (data.token) {
+          token = data.token;
+          user = data.user;
+          localStorage.setItem('arenaToken', token);
+          localStorage.setItem('arenaUser', JSON.stringify(user));
+          showHub();
+        } else {
+          document.getElementById('loginError').textContent = data.error || 'Login failed';
+        }
+      } catch (err) {
+        document.getElementById('loginError').textContent = 'Server offline - run: node server/server.js';
+      }
+    }
+
+    async function register() {
+      const username = document.getElementById('regUsername').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+      try {
+        const res = await fetch(`${API}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showLogin();
+          document.getElementById('loginUsername').value = username;
+          alert('Account created! Please login.');
+        } else {
+          document.getElementById('regError').textContent = data.error || 'Registration failed';
+        }
+      } catch (err) {
+        document.getElementById('regError').textContent = 'Connection failed';
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('arenaToken');
+      localStorage.removeItem('arenaUser');
+      localStorage.removeItem('arenaGuest');
+      isGuest = false;
+      location.reload();
+    }
+
+    function showSection(name) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      event.target.closest('.nav-tab').classList.add('active');
+      document.getElementById(name + 'Section').classList.add('active');
+      if (name === 'inventory') loadInventory();
+      if (name === 'training') loadTraining();
+      if (name === 'shop') loadShop();
+      if (name === 'achievements') loadAchievements();
+      if (name === 'leaderboard') loadLeaderboard('score');
+    }
+
+    async function showHub() {
+      document.getElementById('authPanel').style.display = 'none';
+      document.getElementById('hub').classList.add('active');
+      document.getElementById('playerName').textContent = user.username + (isGuest ? ' (Guest)' : '');
+
+      if (isGuest) {
+        // Guest mode - use local data
+        updateCharacterDisplay();
+        updatePlayButton();
+        loadLeaderboardPreview();
+      } else {
+        await loadCharacter();
+        await loadGameAccess();
+        await loadLeaderboardPreview();
+      }
+    }
+
+    async function loadGameAccess() {
+      if (isGuest) {
+        gameAccess = { canPlay: true, freeRounds: 999, paidRounds: 0 };
+        updatePlayButton();
+        return;
+      }
+      try {
+        const res = await fetch(`${API}/game/canPlay`, { headers: { 'Authorization': `Bearer ${token}` } });
+        gameAccess = await res.json();
+        updatePlayButton();
+      } catch (err) {
+        console.error('Failed to load game access:', err);
+        gameAccess = { canPlay: true, freeRounds: 999, paidRounds: 0 };
+        document.getElementById('freeRoundsText').textContent = 'Offline mode';
+        updatePlayButton();
+      }
+    }
+
+    function updatePlayButton() {
+      const btn = document.getElementById('playBtn');
+      const text = document.getElementById('freeRoundsText');
+      const cost = document.getElementById('playCost');
+
+      if (!gameAccess) return;
+
+      if (gameAccess.freeRoundsLeft > 0) {
+        text.innerHTML = `<span class="free">FREE ROUNDS: ${gameAccess.freeRoundsLeft}/${gameAccess.freeRoundsTotal}</span>`;
+        btn.disabled = false;
+        btn.innerHTML = `<img src="assets/icons32/fb920.png" class="icon32"> ENTER ARENA (FREE)`;
+        cost.textContent = '';
+      } else if (gameAccess.canPayGold) {
+        text.innerHTML = `<span class="paid">FREE ROUNDS: 0/${gameAccess.freeRoundsTotal}</span>`;
+        btn.disabled = false;
+        btn.innerHTML = `<img src="assets/icons32/fb920.png" class="icon32"> ENTER ARENA`;
+        cost.innerHTML = `<img src="assets/icons32/fb940.png" class="icon24" style="vertical-align:middle;"> ${gameAccess.goldCost} gold per game`;
+      } else {
+        text.innerHTML = `<span class="none">NO FREE ROUNDS LEFT</span>`;
+        btn.disabled = true;
+        btn.innerHTML = `<img src="assets/icons32/fb920.png" class="icon32"> NOT ENOUGH GOLD`;
+        cost.innerHTML = `Need ${gameAccess.goldCost} gold - you have ${gameAccess.gold}`;
+      }
+    }
+
+    async function loadCharacter() {
+      if (isGuest) {
+        updateCharacterDisplay();
+        return;
+      }
+      try {
+        const res = await fetch(`${API}/character`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        character = data.character;
+        inventory = data.inventory;
+        updateCharacterDisplay();
+      } catch (err) {
+        console.error('Failed to load character:', err);
+        // Fallback to guest mode on server error
+        playAsGuest();
+      }
+    }
+
+    function updateCharacterDisplay() {
+      if (!character) return;
+      document.getElementById('charLevel').textContent = character.level || 1;
+      document.getElementById('charXp').textContent = character.xp || 0;
+      document.getElementById('charXpNeeded').textContent = (character.level || 1) * 100;
+      document.getElementById('xpFill').style.width = Math.min(100, (character.xp || 0) / ((character.level || 1) * 100) * 100) + '%';
+      document.getElementById('headerGold').textContent = (character.gold || 0).toLocaleString();
+      document.getElementById('charHp').textContent = character.max_hp || 120;
+      document.getElementById('charDamage').textContent = character.base_damage || 5;
+      document.getElementById('charDefense').textContent = character.base_defense || 0;
+      document.getElementById('charKills').textContent = (character.total_kills || 0).toLocaleString();
+      document.getElementById('charGames').textContent = character.total_games || character.games_played || 0;
+      document.getElementById('charBestScore').textContent = (character.best_score || character.highest_score || 0).toLocaleString();
+      document.getElementById('charBestWave').textContent = character.best_wave || character.highest_wave || 0;
+      const playtime = character.playtime_seconds || 0;
+      const hours = Math.floor(playtime / 3600);
+      const mins = Math.floor((playtime % 3600) / 60);
+      document.getElementById('charPlaytime').textContent = `${hours}h ${mins}m`;
+
+      const weapon = inventory.find(i => i.item_type === 'weapon' && i.equipped);
+      const armor = inventory.find(i => i.item_type === 'armor' && i.equipped);
+      if (weapon) {
+        const data = JSON.parse(weapon.item_data || '{}');
+        document.getElementById('eqWeaponName').textContent = weapon.item_name;
+        document.getElementById('eqWeaponStats').textContent = `+${data.damage || 0} DMG`;
+        document.getElementById('eqWeaponSlot').classList.add('filled');
+      } else {
+        document.getElementById('eqWeaponName').textContent = 'None';
+        document.getElementById('eqWeaponStats').textContent = '';
+        document.getElementById('eqWeaponSlot').classList.remove('filled');
+      }
+      if (armor) {
+        const data = JSON.parse(armor.item_data || '{}');
+        document.getElementById('eqArmorName').textContent = armor.item_name;
+        document.getElementById('eqArmorStats').textContent = `+${data.defense || 0} DEF`;
+        document.getElementById('eqArmorSlot').classList.add('filled');
+      } else {
+        document.getElementById('eqArmorName').textContent = 'None';
+        document.getElementById('eqArmorStats').textContent = '';
+        document.getElementById('eqArmorSlot').classList.remove('filled');
+      }
+    }
+
+    async function loadLeaderboardPreview() {
+      try {
+        const res = await fetch(`${API}/leaderboard?type=score`);
+        const entries = await res.json();
+        document.getElementById('leaderboardPreview').innerHTML = entries.slice(0, 5).map((e, i) => `
+          <div class="char-stat">
+            <span class="label"><span style="color:${i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : '#888'}">#${i + 1}</span> ${e.username}</span>
+            <span class="value gold">${e.score.toLocaleString()}</span>
+          </div>
+        `).join('') || '<p style="color:#666">No entries yet</p>';
+      } catch (err) { document.getElementById('leaderboardPreview').innerHTML = '<p style="color:#666">Could not load</p>'; }
+    }
+
+    async function loadInventory() {
+      await loadCharacter();
+      const grid = document.getElementById('inventoryGrid');
+      const empty = document.getElementById('emptyInventory');
+      if (inventory.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+      const rarityColors = { common: '#aaa', uncommon: '#4f4', rare: '#44f', epic: '#a4f', legendary: '#fa0' };
+      grid.innerHTML = inventory.map(item => {
+        const data = JSON.parse(item.item_data || '{}');
+        const rarity = data.rarity || 'common';
+        const icon = item.item_type === 'weapon' ? 'fb920.png' : item.item_type === 'armor' ? 'fb100.png' : 'fb1.png';
+        const stats = item.item_type === 'weapon' ? `+${data.damage || 0} DMG` : item.item_type === 'armor' ? `+${data.defense || 0} DEF` : data.effect || '';
+        const sellPrice = Math.floor((data.tier || 1) * 25 * (rarity === 'legendary' ? 5 : rarity === 'epic' ? 3 : rarity === 'rare' ? 2 : 1));
+        return `
+          <div class="inv-item ${item.equipped ? 'equipped' : ''} rarity-${rarity}">
+            <div class="item-icon"><img src="assets/icons32/${icon}" class="icon32"></div>
+            <div class="item-info">
+              <div class="item-name" style="color:${rarityColors[rarity]}">${item.item_name}${item.equipped ? ' (E)' : ''}</div>
+              <div class="item-stats">${stats}</div>
+              <div class="item-rarity" style="color:${rarityColors[rarity]}">${rarity.charAt(0).toUpperCase() + rarity.slice(1)}</div>
+            </div>
+            <div class="item-actions">
+              ${item.item_type !== 'potion' ? (item.equipped ? `<button class="unequip-btn" onclick="unequipItem(${item.id})">Unequip</button>` : `<button class="equip-btn" onclick="equipItem(${item.id})">Equip</button>`) : ''}
+              ${!item.equipped ? `<button class="sell-btn" onclick="sellItem(${item.id})">Sell ${sellPrice}g</button>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    async function equipItem(id) { await fetch(`${API}/inventory/equip/${id}`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } }); loadInventory(); }
+    async function unequipItem(id) { await fetch(`${API}/inventory/unequip/${id}`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } }); loadInventory(); }
+    async function sellItem(id) { const res = await fetch(`${API}/inventory/sell/${id}`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } }); if ((await res.json()).success) loadInventory(); }
+
+    async function loadTraining() {
+      const res = await fetch(`${API}/training`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      const stats = { max_hp: { name: 'Max Health', icon: 'fb3.png' }, base_damage: { name: 'Base Damage', icon: 'fb920.png' }, base_defense: { name: 'Base Defense', icon: 'fb650.png' } };
+      document.getElementById('trainingGrid').innerHTML = Object.entries(data.upgrades).map(([stat, info]) => `
+        <div class="training-card">
+          <div class="stat-icon"><img src="assets/icons32/${stats[stat].icon}" style="width:48px;height:48px;"></div>
+          <div class="stat-name">${stats[stat].name}</div>
+          <div class="stat-value">${info.current}</div>
+          <div class="stat-increase">+${info.increase} per upgrade</div>
+          <button onclick="trainStat('${stat}')" ${data.gold < info.cost ? 'disabled' : ''}><img src="assets/icons32/fb940.png" class="icon24"> ${info.cost}</button>
+        </div>`).join('');
+    }
+
+    async function trainStat(stat) {
+      const res = await fetch(`${API}/training/upgrade`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ stat }) });
+      if ((await res.json()).success) { await loadCharacter(); loadTraining(); }
+    }
+
+    async function loadShop() {
+      const res = await fetch(`${API}/shop`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      document.getElementById('shopGold').textContent = data.gold.toLocaleString();
+      const icons = { potion: 'fb1.png', weapon: 'fb920.png', armor: 'fb100.png' };
+      document.getElementById('shopGrid').innerHTML = data.items.map(item => {
+        const stats = item.type === 'weapon' ? `+${item.data.damage} DMG` : item.type === 'armor' ? `+${item.data.defense} DEF` : item.data.effect;
+        return `
+          <div class="shop-item">
+            <div class="item-icon"><img src="assets/icons32/${icons[item.type]}" style="width:48px;height:48px;"></div>
+            <div class="item-name">${item.name}</div>
+            <div class="item-stats">${stats}</div>
+            <div class="item-price"><img src="assets/icons32/fb940.png" class="icon24"> ${item.price}</div>
+            <button onclick="buyItem(${item.id})" ${data.gold < item.price ? 'disabled' : ''}>Buy</button>
+          </div>`;
+      }).join('');
+    }
+
+    async function buyItem(id) {
+      const res = await fetch(`${API}/shop/buy`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ itemId: id }) });
+      if ((await res.json()).success) { await loadCharacter(); loadShop(); }
+    }
+
+    async function loadAchievements() {
+      const res = await fetch(`${API}/achievements`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const achievements = await res.json();
+      document.getElementById('achievementsGrid').innerHTML = achievements.map(a => {
+        const status = a.claimed ? 'claimed' : a.unlocked ? 'unlocked' : 'locked';
+        const icon = a.claimed ? 'fb4.png' : a.unlocked ? 'fb60.png' : 'fb2.png';
+        return `
+          <div class="ach-item ${status}">
+            <div class="ach-icon"><img src="assets/icons32/${icon}" class="icon32"></div>
+            <div class="ach-info">
+              <div class="ach-name">${a.name}</div>
+              <div class="ach-desc">${a.desc}</div>
+              <div class="ach-reward"><img src="assets/icons32/fb940.png" class="icon24"> ${a.reward}</div>
+            </div>
+            ${a.unlocked && !a.claimed ? `<button onclick="claimAchievement(${a.id})">Claim</button>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    async function claimAchievement(id) {
+      const res = await fetch(`${API}/achievements/claim/${id}`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+      if ((await res.json()).success) { await loadCharacter(); loadAchievements(); }
+    }
+
+    async function loadLeaderboard(type, btn) {
+      if (btn) { document.querySelectorAll('.lb-tabs button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+      const res = await fetch(`${API}/leaderboard?type=${type}`);
+      const entries = await res.json();
+      document.getElementById('leaderboardBody').innerHTML = entries.slice(0, 50).map((e, i) => `
+        <tr>
+          <td class="rank ${i < 3 ? 'rank-' + (i+1) : ''}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</td>
+          <td>${e.username}</td>
+          <td style="color:#4af">${e.level}</td>
+          <td class="score">${e.score.toLocaleString()}</td>
+          <td style="color:#f80">${e.wave}</td>
+          <td style="color:#f44">${e.kills}</td>
+        </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#666;">No entries yet</td></tr>';
+    }
+
+    async function playGame() {
+      if (!gameAccess || !gameAccess.canPlay) return;
+
+      try {
+        const useGold = gameAccess.freeRoundsLeft <= 0;
+        const res = await fetch(`${API}/game/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ useGold })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          sessionStorage.setItem('gameToken', token);
+          sessionStorage.setItem('gameUser', JSON.stringify(user));
+          sessionStorage.setItem('gameMethod', data.method);
+          window.location.href = 'arena.html';
+        } else {
+          alert(data.error || 'Cannot start game');
+          loadGameAccess();
+        }
+      } catch (err) {
+        alert('Server error - cannot start game');
+      }
+    }
+  </script>
+</body>
+</html>

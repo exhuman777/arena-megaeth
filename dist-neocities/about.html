@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Arena Survival - About</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0808 50%, #0a0a0a 100%);
+      color: #fff;
+      font-family: monospace;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .nav {
+      background: #111;
+      border-bottom: 1px solid #333;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav .logo { color: #f44; font-size: 20px; text-decoration: none; }
+    .nav .links a {
+      color: #888;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+    .nav .links a:hover { color: #f80; }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    h1 {
+      color: #f80;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .about-section {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 20px;
+    }
+    .about-section h2 {
+      color: #f80;
+      margin-top: 0;
+    }
+    .about-section p {
+      color: #aaa;
+      line-height: 1.8;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .feature-item {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .feature-item .icon { font-size: 24px; }
+    .feature-item .text { color: #ccc; font-size: 13px; }
+
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .tech-tag {
+      background: #222;
+      border: 1px solid #444;
+      border-radius: 20px;
+      padding: 8px 16px;
+      color: #aaa;
+      font-size: 12px;
+    }
+
+    .credits {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 1px solid #333;
+    }
+    .credits h3 { color: #ff0; margin-bottom: 15px; }
+    .credits p { color: #666; font-size: 13px; line-height: 1.6; }
+
+    .version-info {
+      text-align: center;
+      margin-top: 30px;
+      padding: 20px;
+      background: #111;
+      border-radius: 8px;
+    }
+    .version-info .version { color: #f80; font-size: 24px; margin-bottom: 5px; }
+    .version-info .date { color: #666; font-size: 12px; }
+
+    .cta {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .cta a {
+      display: inline-block;
+      padding: 15px 40px;
+      background: linear-gradient(180deg, #f44, #c22);
+      border: 2px solid #f66;
+      border-radius: 8px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+      transition: all 0.2s;
+    }
+    .cta a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255,68,68,0.4);
+    }
+
+    .footer {
+      background: #0a0a0a;
+      border-top: 1px solid #222;
+      padding: 20px;
+      text-align: center;
+      color: #444;
+      font-size: 12px;
+      margin-top: 40px;
+    }
+    .footer a { color: #666; text-decoration: none; margin: 0 10px; }
+    .footer a:hover { color: #f80; }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="index.html" class="logo">⚔️ ARENA SURVIVAL</a>
+    <div class="links">
+      <a href="hub.html">Play</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="guides.html">Guides</a>
+      <a href="about.html">About</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1>ABOUT ARENA SURVIVAL</h1>
+
+    <div class="about-section">
+      <h2>⚔️ The Game</h2>
+      <p>
+        Arena Survival is a roguelike survival game where you fight endless waves of monsters
+        in a brutal arena. Each run is unique - collect loot, build combos, and climb the leaderboard.
+        Death is permanent for each run, but your warrior grows stronger over time through
+        persistent upgrades and equipment.
+      </p>
+
+      <div class="feature-grid">
+        <div class="feature-item">
+          <div class="icon">👹</div>
+          <div class="text">16+ unique monster types</div>
+        </div>
+        <div class="feature-item">
+          <div class="icon">⚔️</div>
+          <div class="text">Weapons, armor & potions</div>
+        </div>
+        <div class="feature-item">
+          <div class="icon">🏆</div>
+          <div class="text">Global leaderboard</div>
+        </div>
+        <div class="feature-item">
+          <div class="icon">📈</div>
+          <div class="text">Persistent progression</div>
+        </div>
+        <div class="feature-item">
+          <div class="icon">🎖️</div>
+          <div class="text">13+ achievements</div>
+        </div>
+        <div class="feature-item">
+          <div class="icon">💀</div>
+          <div class="text">Permadeath roguelike</div>
+        </div>
+        <div class="feature-item">
+          <div class="icon">⚡</div>
+          <div class="text">Combo & chain attacks</div>
+        </div>
+        <div class="feature-item">
+          <div class="icon">🏠</div>
+          <div class="text">Warrior's Quarters hub</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2>🛠️ Technology</h2>
+      <p>
+        Built as a browser-based game with a Node.js backend for persistent data.
+        No downloads required - play instantly in your browser.
+      </p>
+      <div class="tech-stack">
+        <span class="tech-tag">JavaScript</span>
+        <span class="tech-tag">HTML5 Canvas</span>
+        <span class="tech-tag">ROT.js</span>
+        <span class="tech-tag">Node.js</span>
+        <span class="tech-tag">Express</span>
+        <span class="tech-tag">SQLite</span>
+        <span class="tech-tag">JWT Auth</span>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2>🎮 How to Play</h2>
+      <p>
+        Use WASD or Arrow keys to move. Attack enemies by walking into them or using
+        attack keys (H/X). Use AOE attacks (J/C) to hit multiple enemies at once.
+        Collect loot, survive as long as possible, and beat the high score!
+      </p>
+      <p style="margin-top:15px;">
+        <a href="guides.html" style="color:#f80;">Read the full guide →</a>
+      </p>
+    </div>
+
+    <div class="about-section">
+      <h2>🎯 Game Features</h2>
+      <ul style="color:#aaa;line-height:2;">
+        <li><strong style="color:#f80;">Wave System</strong> - Progressively harder enemy waves</li>
+        <li><strong style="color:#f80;">Combo Kills</strong> - Chain kills for bonus XP and epic titles</li>
+        <li><strong style="color:#f80;">Chain Lightning</strong> - Critical hits bounce between enemies</li>
+        <li><strong style="color:#f80;">Biome Changes</strong> - Arena transforms as you play</li>
+        <li><strong style="color:#f80;">Training System</strong> - Permanently upgrade your stats</li>
+        <li><strong style="color:#f80;">Shop</strong> - Buy weapons, armor, and potions</li>
+        <li><strong style="color:#f80;">Achievements</strong> - Complete challenges for gold</li>
+        <li><strong style="color:#f80;">Inventory</strong> - Manage and equip your gear</li>
+      </ul>
+    </div>
+
+    <div class="version-info">
+      <div class="version">v1.0</div>
+      <div class="date">January 2024</div>
+    </div>
+
+    <div class="credits">
+      <h3>Credits</h3>
+      <p>
+        Game Engine: ROT.js (Roguelike Toolkit)<br>
+        Graphics: Roguelike tileset<br>
+        Icons: Raven Fantasy Icons
+      </p>
+    </div>
+
+    <div class="cta">
+      <a href="hub.html">⚔️ PLAY NOW</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="index.html">Home</a> |
+    <a href="leaderboard.html">Leaderboard</a> |
+    <a href="guides.html">Guides</a> |
+    <a href="about.html">About</a>
+  </div>
+</body>
+</html>

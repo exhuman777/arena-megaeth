@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Arena Survival</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1010 50%, #0a0a0a 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #f33;
+      font-family: monospace;
+      text-shadow: 0 0 10px #f00, 2px 2px #000;
+      margin: 8px 0 10px 0;
+      font-size: 24px;
+      letter-spacing: 3px;
+      text-align: center;
+    }
+    #game-container {
+      border: 2px solid #333;
+      box-shadow: 0 0 30px rgba(255,0,0,0.3), inset 0 0 20px rgba(0,0,0,0.5);
+      border-radius: 5px;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 900px) {
+      body { padding: 5px; }
+      h1 { font-size: 18px; margin: 5px 0; letter-spacing: 2px; }
+
+      /* Scale game container */
+      #game-container {
+        transform-origin: top center;
+      }
+
+      /* Stack panels vertically on mobile */
+      .game-wrapper {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 10px !important;
+      }
+
+      /* Horizontal panels on mobile */
+      .game-wrapper > div:first-child,
+      .game-wrapper > div:last-child {
+        width: 100% !important;
+        max-width: 800px !important;
+        order: 1 !important;
+        max-height: 120px !important;
+        overflow-y: auto !important;
+        font-size: 11px !important;
+      }
+
+      /* Game in middle */
+      .game-wrapper > div:nth-child(2) {
+        order: 0 !important;
+      }
+
+      /* Leave room for touch controls */
+      body {
+        padding-bottom: 200px;
+      }
+    }
+
+    /* Very small screens */
+    @media (max-width: 500px) {
+      h1 { font-size: 14px; }
+      #game-container {
+        transform: scale(0.6);
+        transform-origin: top center;
+        margin-bottom: -150px;
+      }
+    }
+
+    /* Medium mobile */
+    @media (min-width: 501px) and (max-width: 700px) {
+      #game-container {
+        transform: scale(0.8);
+        transform-origin: top center;
+        margin-bottom: -60px;
+      }
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    /* Prevent pull-to-refresh */
+    body {
+      overscroll-behavior: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚔ ARENA SURVIVAL ⚔</h1>
+  <div id="megaeth-status" style="font-family:monospace;font-size:12px;margin-bottom:8px;"></div>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6/dist/ethers.umd.min.js"></script>
+  <script src="assets/storage.js"></script>
+  <script src="assets/rot.js"></script>
+  <script src="assets/tilemap.js"></script>
+  <script src="assets/megaeth.js"></script>
+  <script src="assets/arena.js"></script>
+</body>
+</html>

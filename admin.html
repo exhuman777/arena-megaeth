@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Arena Survival - Admin Panel</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { color: #f44; margin-bottom: 20px; }
+    h2 { color: #f80; border-bottom: 1px solid #333; padding-bottom: 10px; }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .login-form, .admin-content { display: none; }
+    .login-form.active, .admin-content.active { display: block; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #333;
+    }
+    .stat-card .value { font-size: 32px; color: #ff0; }
+    .stat-card .label { color: #888; font-size: 12px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #333;
+    }
+    th { background: #1a1a1a; color: #f80; }
+    tr:hover { background: #111; }
+
+    input, select, button {
+      padding: 10px 15px;
+      border: 1px solid #333;
+      background: #1a1a1a;
+      color: #fff;
+      border-radius: 4px;
+      margin: 5px;
+    }
+    button {
+      background: #f44;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { background: #f66; }
+    button.secondary { background: #333; }
+    button.secondary:hover { background: #444; }
+
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; color: #888; }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 20px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      cursor: pointer;
+    }
+    .tab.active { background: #f44; border-color: #f44; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🛡️ Arena Survival - Admin Panel</h1>
+
+    <!-- Login Form -->
+    <div class="login-form active" id="loginForm">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="admin">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="admin123">
+      </div>
+      <button onclick="login()">Login</button>
+      <p id="loginError" style="color:#f44;"></p>
+    </div>
+
+    <!-- Admin Content -->
+    <div class="admin-content" id="adminContent">
+      <button onclick="logout()" style="float:right;">Logout</button>
+
+      <div class="tabs">
+        <div class="tab active" onclick="showSection('stats')">📊 Stats</div>
+        <div class="tab" onclick="showSection('users')">👥 Users</div>
+        <div class="tab" onclick="showSection('leaderboard')">🏆 Leaderboard</div>
+        <div class="tab" onclick="showSection('rewards')">🎁 Rewards</div>
+      </div>
+
+      <!-- Stats Section -->
+      <div class="section active" id="statsSection">
+        <h2>Game Statistics</h2>
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+
+      <!-- Users Section -->
+      <div class="section" id="usersSection">
+        <h2>Users</h2>
+        <table id="usersTable">
+          <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Admin</th><th>Created</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Leaderboard Section -->
+      <div class="section" id="leaderboardSection">
+        <h2>Leaderboard</h2>
+        <select onchange="loadLeaderboard(this.value)">
+          <option value="score">By Score</option>
+          <option value="wave">By Wave</option>
+          <option value="kills">By Kills</option>
+        </select>
+        <table id="leaderboardTable">
+          <thead><tr><th>#</th><th>Player</th><th>Level</th><th>Score</th><th>Wave</th><th>Kills</th><th>Time</th><th>Date</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Rewards Section -->
+      <div class="section" id="rewardsSection">
+        <h2>Rewards</h2>
+        <div style="background:#1a1a1a;padding:20px;border-radius:8px;margin-bottom:20px;">
+          <h3 style="margin-top:0;">Create New Reward</h3>
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="rewardName" placeholder="First Blood">
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="rewardDesc" placeholder="Reach wave 5">
+          </div>
+          <div class="form-group">
+            <label>Min Score Required</label>
+            <input type="number" id="rewardMinScore" value="0">
+          </div>
+          <div class="form-group">
+            <label>Min Wave Required</label>
+            <input type="number" id="rewardMinWave" value="0">
+          </div>
+          <div class="form-group">
+            <label>Gold Reward</label>
+            <input type="number" id="rewardGold" value="100">
+          </div>
+          <button onclick="createReward()">Create Reward</button>
+        </div>
+        <table id="rewardsTable">
+          <thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Min Score</th><th>Min Wave</th><th>Data</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3001/api';
+    let token = localStorage.getItem('adminToken');
+
+    if (token) {
+      document.getElementById('loginForm').classList.remove('active');
+      document.getElementById('adminContent').classList.add('active');
+      loadAll();
+    }
+
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch(`${API}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (data.token && data.user.is_admin) {
+          token = data.token;
+          localStorage.setItem('adminToken', token);
+          document.getElementById('loginForm').classList.remove('active');
+          document.getElementById('adminContent').classList.add('active');
+          loadAll();
+        } else {
+          document.getElementById('loginError').textContent = data.error || 'Admin access required';
+        }
+      } catch (err) {
+        document.getElementById('loginError').textContent = 'Connection failed';
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('adminToken');
+      location.reload();
+    }
+
+    function showSection(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(name + 'Section').classList.add('active');
+    }
+
+    async function loadAll() {
+      loadStats();
+      loadUsers();
+      loadLeaderboard('score');
+      loadRewards();
+    }
+
+    async function loadStats() {
+      const res = await fetch(`${API}/admin/stats`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const stats = await res.json();
+
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="stat-card"><div class="value">${stats.totalUsers}</div><div class="label">Total Users</div></div>
+        <div class="stat-card"><div class="value">${stats.totalGames}</div><div class="label">Games Played</div></div>
+        <div class="stat-card"><div class="value">${stats.totalKills}</div><div class="label">Total Kills</div></div>
+        <div class="stat-card"><div class="value">${stats.topScore}</div><div class="label">Top Score</div></div>
+        <div class="stat-card"><div class="value">${stats.topWave}</div><div class="label">Top Wave</div></div>
+      `;
+    }
+
+    async function loadUsers() {
+      const res = await fetch(`${API}/admin/users`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const users = await res.json();
+
+      document.querySelector('#usersTable tbody').innerHTML = users.map(u => `
+        <tr>
+          <td>${u.id}</td>
+          <td>${u.username}</td>
+          <td>${u.email || '-'}</td>
+          <td>${u.is_admin ? '✅' : ''}</td>
+          <td>${new Date(u.created_at).toLocaleDateString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadLeaderboard(type) {
+      const res = await fetch(`${API}/leaderboard?type=${type}`);
+      const entries = await res.json();
+
+      document.querySelector('#leaderboardTable tbody').innerHTML = entries.map((e, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${e.username}</td>
+          <td>${e.level}</td>
+          <td>${e.score}</td>
+          <td>${e.wave}</td>
+          <td>${e.kills}</td>
+          <td>${Math.floor(e.time_seconds / 60)}:${String(e.time_seconds % 60).padStart(2, '0')}</td>
+          <td>${new Date(e.created_at).toLocaleDateString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadRewards() {
+      const res = await fetch(`${API}/admin/rewards`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const rewards = await res.json();
+
+      document.querySelector('#rewardsTable tbody').innerHTML = rewards.map(r => `
+        <tr>
+          <td>${r.id}</td>
+          <td>${r.name}</td>
+          <td>${r.description || '-'}</td>
+          <td>${r.min_score}</td>
+          <td>${r.min_wave}</td>
+          <td>${r.reward_data}</td>
+          <td><button class="secondary" onclick="deleteReward(${r.id})">Delete</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function createReward() {
+      const name = document.getElementById('rewardName').value;
+      const description = document.getElementById('rewardDesc').value;
+      const min_score = parseInt(document.getElementById('rewardMinScore').value);
+      const min_wave = parseInt(document.getElementById('rewardMinWave').value);
+      const gold = parseInt(document.getElementById('rewardGold').value);
+
+      await fetch(`${API}/admin/rewards`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          name, description, min_score, min_wave,
+          reward_type: 'gold',
+          reward_data: { gold }
+        })
+      });
+
+      loadRewards();
+    }
+
+    async function deleteReward(id) {
+      if (!confirm('Delete this reward?')) return;
+      await fetch(`${API}/admin/rewards/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      loadRewards();
+    }
+  </script>
+</body>
+</html>

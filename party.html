@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Arena Survival - Party Mode</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0808 50%, #0a0a0a 100%);
+      color: #fff;
+      font-family: monospace;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #f80;
+      font-size: 48px;
+      text-shadow: 0 0 20px #f80;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #888;
+      font-size: 20px;
+      margin-bottom: 40px;
+    }
+
+    .setup-container {
+      background: rgba(0,0,0,0.8);
+      border: 2px solid #f44;
+      border-radius: 15px;
+      padding: 40px;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .player-count {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .player-count button {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(180deg, #333, #222);
+      border: 2px solid #444;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .player-count button:hover {
+      border-color: #f80;
+      transform: scale(1.1);
+    }
+    .player-count button.active {
+      background: linear-gradient(180deg, #f80, #c60);
+      border-color: #fa0;
+    }
+
+    .player-inputs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .player-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+    }
+    .player-input.hidden { display: none; }
+    .player-input .num {
+      background: #f44;
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .player-input input {
+      flex: 1;
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 12px;
+      color: #fff;
+      font-size: 18px;
+      font-family: monospace;
+    }
+    .player-input input:focus {
+      outline: none;
+      border-color: #f80;
+    }
+
+    .rounds-select {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .rounds-select label {
+      color: #888;
+      font-size: 18px;
+      margin-right: 15px;
+    }
+    .rounds-select select {
+      background: #222;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 10px 20px;
+      color: #fff;
+      font-size: 18px;
+      font-family: monospace;
+    }
+
+    .start-btn {
+      display: block;
+      width: 100%;
+      padding: 20px;
+      background: linear-gradient(180deg, #f44, #c22);
+      border: 3px solid #f66;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 28px;
+      font-family: monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .start-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(255,68,68,0.5);
+    }
+    .start-btn:disabled {
+      background: #444;
+      border-color: #666;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .back-link {
+      margin-top: 20px;
+      color: #666;
+      text-decoration: none;
+    }
+    .back-link:hover { color: #f80; }
+  </style>
+</head>
+<body>
+  <h1>PARTY MODE</h1>
+  <p class="subtitle">Local multiplayer - take turns on the same screen!</p>
+
+  <div class="setup-container">
+    <div style="text-align:center;color:#ff0;margin-bottom:20px;font-size:18px;">
+      HOW MANY PLAYERS?
+    </div>
+
+    <div class="player-count">
+      <button onclick="setPlayerCount(1)">1</button>
+      <button onclick="setPlayerCount(2)" class="active">2</button>
+      <button onclick="setPlayerCount(3)">3</button>
+      <button onclick="setPlayerCount(4)">4</button>
+      <button onclick="setPlayerCount(5)">5</button>
+      <button onclick="setPlayerCount(6)">6</button>
+    </div>
+
+    <div class="player-inputs" id="playerInputs">
+      <div class="player-input" data-player="1">
+        <div class="num">1</div>
+        <input type="text" placeholder="Player 1 name" maxlength="12">
+      </div>
+      <div class="player-input" data-player="2">
+        <div class="num">2</div>
+        <input type="text" placeholder="Player 2 name" maxlength="12">
+      </div>
+      <div class="player-input hidden" data-player="3">
+        <div class="num">3</div>
+        <input type="text" placeholder="Player 3 name" maxlength="12">
+      </div>
+      <div class="player-input hidden" data-player="4">
+        <div class="num">4</div>
+        <input type="text" placeholder="Player 4 name" maxlength="12">
+      </div>
+      <div class="player-input hidden" data-player="5">
+        <div class="num">5</div>
+        <input type="text" placeholder="Player 5 name" maxlength="12">
+      </div>
+      <div class="player-input hidden" data-player="6">
+        <div class="num">6</div>
+        <input type="text" placeholder="Player 6 name" maxlength="12">
+      </div>
+    </div>
+
+    <div class="rounds-select">
+      <label>Rounds per player:</label>
+      <select id="roundsSelect">
+        <option value="1">1 round</option>
+        <option value="2">2 rounds</option>
+        <option value="3" selected>3 rounds</option>
+        <option value="5">5 rounds</option>
+      </select>
+    </div>
+
+    <button class="start-btn" id="startBtn" onclick="startParty()">
+      START PARTY!
+    </button>
+  </div>
+
+  <a href="index.html" class="back-link">Back to Main Menu</a>
+
+  <script>
+    let playerCount = 2;
+
+    function setPlayerCount(count) {
+      playerCount = count;
+
+      // Update buttons
+      document.querySelectorAll('.player-count button').forEach((btn, i) => {
+        btn.classList.toggle('active', i + 1 === count);
+      });
+
+      // Show/hide inputs
+      document.querySelectorAll('.player-input').forEach((input, i) => {
+        input.classList.toggle('hidden', i + 1 > count);
+      });
+
+      validateInputs();
+    }
+
+    function validateInputs() {
+      const inputs = document.querySelectorAll('.player-input:not(.hidden) input');
+      let allFilled = true;
+      inputs.forEach(input => {
+        if (!input.value.trim()) allFilled = false;
+      });
+      document.getElementById('startBtn').disabled = !allFilled;
+    }
+
+    // Add input listeners
+    document.querySelectorAll('.player-input input').forEach(input => {
+      input.addEventListener('input', validateInputs);
+    });
+
+    function startParty() {
+      const players = [];
+      document.querySelectorAll('.player-input:not(.hidden) input').forEach(input => {
+        players.push(input.value.trim() || `Player ${players.length + 1}`);
+      });
+
+      const rounds = parseInt(document.getElementById('roundsSelect').value);
+
+      // Store party data
+      const partyData = {
+        players: players.map(name => ({
+          name,
+          scores: [],
+          totalScore: 0,
+          kills: 0,
+          bestWave: 0,
+          gold: 0
+        })),
+        rounds: rounds,
+        currentPlayer: 0,
+        currentRound: 0
+      };
+
+      sessionStorage.setItem('partyData', JSON.stringify(partyData));
+      window.location.href = 'party-game.html';
+    }
+
+    // Initialize
+    validateInputs();
+  </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc = "0.8.20"
+
+# Remappings for Solady
+remappings = [
+    "solady/=lib/solady/src/",
+    "forge-std/=lib/forge-std/src/"
+]
+
+# MegaETH Testnet
+[rpc_endpoints]
+megaeth_testnet = "https://carrot.megaeth.com/rpc"
+megaeth_mainnet = "https://mainnet.megaeth.com/rpc"
+
+[etherscan]
+megaeth_testnet = { key = "", url = "https://megaeth-testnet-v2.blockscout.com/api" }
+megaeth_mainnet = { key = "", url = "https://mega.etherscan.io/api" }

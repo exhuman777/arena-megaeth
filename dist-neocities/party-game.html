@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Arena Survival - Party Game</title>
+  <script src="assets/rot.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: monospace;
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Party overlay screens */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .overlay.hidden { display: none; }
+
+    /* Turn announcement */
+    #turnScreen h1 {
+      font-size: 72px;
+      color: #f80;
+      margin: 0;
+      text-shadow: 0 0 30px #f80;
+    }
+    #turnScreen .player-name {
+      font-size: 96px;
+      color: #fff;
+      margin: 20px 0;
+      text-shadow: 0 0 20px #fff;
+    }
+    #turnScreen .round-info {
+      font-size: 32px;
+      color: #888;
+      margin-bottom: 40px;
+    }
+    #turnScreen .ready-btn {
+      padding: 25px 80px;
+      font-size: 36px;
+      background: linear-gradient(180deg, #4a4, #282);
+      border: 3px solid #6c6;
+      border-radius: 15px;
+      color: #fff;
+      cursor: pointer;
+      font-family: monospace;
+      transition: all 0.2s;
+    }
+    #turnScreen .ready-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 40px rgba(68,255,68,0.5);
+    }
+
+    /* Results screen */
+    #resultsScreen h2 {
+      font-size: 48px;
+      color: #f44;
+      margin: 0 0 10px 0;
+    }
+    #resultsScreen .player-result {
+      font-size: 36px;
+      color: #ff0;
+      margin: 20px 0;
+    }
+    #resultsScreen .stats {
+      display: flex;
+      gap: 40px;
+      font-size: 24px;
+      margin: 30px 0;
+    }
+    #resultsScreen .stats div { color: #aaa; }
+    #resultsScreen .stats span { color: #fff; }
+    #resultsScreen .continue-btn {
+      padding: 20px 60px;
+      font-size: 28px;
+      background: linear-gradient(180deg, #f80, #c60);
+      border: 3px solid #fa0;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      font-family: monospace;
+      margin-top: 30px;
+    }
+
+    /* Leaderboard */
+    #leaderboardScreen h1 {
+      font-size: 64px;
+      color: #ff0;
+      margin: 0 0 40px 0;
+      text-shadow: 0 0 30px #ff0;
+    }
+    .leaderboard {
+      width: 600px;
+      max-width: 90%;
+    }
+    .leaderboard-row {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+      margin: 10px 0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent);
+      border-radius: 10px;
+      border-left: 5px solid #888;
+    }
+    .leaderboard-row.rank-1 {
+      background: linear-gradient(90deg, rgba(255,215,0,0.2), transparent);
+      border-left-color: #ffd700;
+    }
+    .leaderboard-row.rank-2 {
+      background: linear-gradient(90deg, rgba(192,192,192,0.15), transparent);
+      border-left-color: #c0c0c0;
+    }
+    .leaderboard-row.rank-3 {
+      background: linear-gradient(90deg, rgba(205,127,50,0.15), transparent);
+      border-left-color: #cd7f32;
+    }
+    .leaderboard-row .rank {
+      font-size: 36px;
+      width: 60px;
+      text-align: center;
+    }
+    .leaderboard-row .rank.gold { color: #ffd700; }
+    .leaderboard-row .rank.silver { color: #c0c0c0; }
+    .leaderboard-row .rank.bronze { color: #cd7f32; }
+    .leaderboard-row .name {
+      flex: 1;
+      font-size: 28px;
+      color: #fff;
+    }
+    .leaderboard-row .score {
+      font-size: 32px;
+      color: #ff0;
+    }
+    .leaderboard-row .details {
+      font-size: 14px;
+      color: #666;
+      margin-left: 20px;
+    }
+
+    .play-again-btn {
+      margin-top: 40px;
+      padding: 20px 60px;
+      font-size: 28px;
+      background: linear-gradient(180deg, #f44, #c22);
+      border: 3px solid #f66;
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      font-family: monospace;
+    }
+
+    /* Scoreboard sidebar */
+    #scoreboard {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.9);
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 15px;
+      z-index: 100;
+      min-width: 200px;
+    }
+    #scoreboard h3 {
+      margin: 0 0 10px 0;
+      color: #f80;
+      font-size: 16px;
+      text-align: center;
+    }
+    #scoreboard .player-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid #222;
+      font-size: 14px;
+    }
+    #scoreboard .player-row.current {
+      color: #ff0;
+      font-weight: bold;
+    }
+    #scoreboard .player-row .name { color: #aaa; }
+    #scoreboard .player-row.current .name { color: #ff0; }
+    #scoreboard .player-row .score { color: #fff; }
+
+    /* Game container */
+    #gameContainer {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      justify-content: center;
+    }
+    #gameContainer.hidden { display: none; }
+
+    #game-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #game-area canvas {
+      position: absolute;
+      pointer-events: none;
+    }
+    #stats-panel {
+      width: 280px;
+      background: rgba(0,0,0,0.8);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    #combat-log {
+      width: 280px;
+      height: 576px;
+      background: rgba(0,0,0,0.8);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 11px;
+    }
+    .log-entry { padding: 2px 0; border-bottom: 1px solid #1a1a1a; }
+  </style>
+</head>
+<body>
+  <!-- Turn announcement -->
+  <div id="turnScreen" class="overlay">
+    <h1>GET READY!</h1>
+    <div class="player-name" id="currentPlayerName">Player 1</div>
+    <div class="round-info" id="roundInfo">Round 1 of 3</div>
+    <button class="ready-btn" onclick="startRound()">PRESS TO START</button>
+  </div>
+
+  <!-- Results after each round -->
+  <div id="resultsScreen" class="overlay hidden">
+    <h2>ROUND COMPLETE!</h2>
+    <div class="player-result" id="resultPlayerName">Player 1</div>
+    <div class="stats" id="resultStats">
+      <div>Score: <span id="resultScore">0</span></div>
+      <div>Wave: <span id="resultWave">0</span></div>
+      <div>Kills: <span id="resultKills">0</span></div>
+    </div>
+    <button class="continue-btn" onclick="nextTurn()">NEXT PLAYER</button>
+  </div>
+
+  <!-- Final leaderboard -->
+  <div id="leaderboardScreen" class="overlay hidden">
+    <h1>FINAL STANDINGS!</h1>
+    <div class="leaderboard" id="leaderboard"></div>
+    <button class="play-again-btn" onclick="location.href='party.html'">PLAY AGAIN</button>
+  </div>
+
+  <!-- Scoreboard (visible during game) -->
+  <div id="scoreboard" style="display:none;">
+    <h3>PARTY SCORES</h3>
+    <div id="scoreboardContent"></div>
+  </div>
+
+  <!-- Game container -->
+  <div id="gameContainer" class="hidden">
+    <div id="combat-log"></div>
+    <div id="game-area"></div>
+    <div id="stats-panel"></div>
+  </div>
+
+  <script>
+    // Party state
+    let partyData = JSON.parse(sessionStorage.getItem('partyData'));
+    if (!partyData) {
+      window.location.href = 'party.html';
+    }
+
+    // Current game state
+    let currentScore = 0;
+    let currentWave = 0;
+    let currentKills = 0;
+
+    function updateTurnScreen() {
+      const player = partyData.players[partyData.currentPlayer];
+      document.getElementById('currentPlayerName').textContent = player.name;
+      document.getElementById('roundInfo').textContent =
+        `Round ${partyData.currentRound + 1} of ${partyData.rounds}`;
+    }
+
+    function updateScoreboard() {
+      const content = partyData.players.map((p, i) => {
+        const isCurrent = i === partyData.currentPlayer;
+        return `
+          <div class="player-row ${isCurrent ? 'current' : ''}">
+            <span class="name">${p.name}</span>
+            <span class="score">${p.totalScore}</span>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('scoreboardContent').innerHTML = content;
+    }
+
+    function startRound() {
+      document.getElementById('turnScreen').classList.add('hidden');
+      document.getElementById('gameContainer').classList.remove('hidden');
+      document.getElementById('scoreboard').style.display = 'block';
+      updateScoreboard();
+
+      // Start the arena game
+      ArenaGame.partyMode = true;
+      ArenaGame.onGameOver = onRoundEnd;
+      ArenaGame.init();
+    }
+
+    function onRoundEnd(score, wave, kills) {
+      currentScore = score;
+      currentWave = wave;
+      currentKills = kills;
+
+      // Update player stats
+      const player = partyData.players[partyData.currentPlayer];
+      player.scores.push(score);
+      player.totalScore += score;
+      player.kills += kills;
+      if (wave > player.bestWave) player.bestWave = wave;
+
+      // Save party data
+      sessionStorage.setItem('partyData', JSON.stringify(partyData));
+
+      // Show results
+      document.getElementById('gameContainer').classList.add('hidden');
+      document.getElementById('resultsScreen').classList.remove('hidden');
+      document.getElementById('resultPlayerName').textContent = player.name;
+      document.getElementById('resultScore').textContent = score;
+      document.getElementById('resultWave').textContent = wave;
+      document.getElementById('resultKills').textContent = kills;
+
+      // Check if this was the last round
+      const isLastPlayer = partyData.currentPlayer === partyData.players.length - 1;
+      const isLastRound = partyData.currentRound === partyData.rounds - 1;
+
+      if (isLastPlayer && isLastRound) {
+        document.querySelector('.continue-btn').textContent = 'SEE FINAL SCORES';
+      } else if (isLastPlayer) {
+        document.querySelector('.continue-btn').textContent = 'NEXT ROUND';
+      } else {
+        document.querySelector('.continue-btn').textContent = 'NEXT PLAYER';
+      }
+    }
+
+    function nextTurn() {
+      document.getElementById('resultsScreen').classList.add('hidden');
+
+      // Move to next player/round
+      partyData.currentPlayer++;
+      if (partyData.currentPlayer >= partyData.players.length) {
+        partyData.currentPlayer = 0;
+        partyData.currentRound++;
+      }
+
+      // Check if game is over
+      if (partyData.currentRound >= partyData.rounds) {
+        showLeaderboard();
+        return;
+      }
+
+      // Save and show next turn
+      sessionStorage.setItem('partyData', JSON.stringify(partyData));
+      updateTurnScreen();
+      document.getElementById('turnScreen').classList.remove('hidden');
+    }
+
+    function showLeaderboard() {
+      // Sort players by total score
+      const sorted = [...partyData.players].sort((a, b) => b.totalScore - a.totalScore);
+
+      const html = sorted.map((p, i) => {
+        const rankClass = i === 0 ? 'rank-1' : (i === 1 ? 'rank-2' : (i === 2 ? 'rank-3' : ''));
+        const rankColor = i === 0 ? 'gold' : (i === 1 ? 'silver' : (i === 2 ? 'bronze' : ''));
+        const medal = i === 0 ? '1st' : (i === 1 ? '2nd' : (i === 2 ? '3rd' : `${i+1}th`));
+
+        return `
+          <div class="leaderboard-row ${rankClass}">
+            <div class="rank ${rankColor}">${medal}</div>
+            <div class="name">${p.name}</div>
+            <div class="score">${p.totalScore}</div>
+            <div class="details">${p.kills} kills | Wave ${p.bestWave}</div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('leaderboard').innerHTML = html;
+      document.getElementById('leaderboardScreen').classList.remove('hidden');
+    }
+
+    // Initialize
+    updateTurnScreen();
+  </script>
+
+  <!-- Arena Game (modified for party mode) -->
+  <script>
+    // Minimal Arena Game for Party Mode
+    var ArenaGame = {
+      display: null,
+      canvas: null,
+      ctx: null,
+      screenWidth: 25,
+      screenHeight: 18,
+      tileSize: 32,
+      lastTime: 0,
+      deltaTime: 0,
+      score: 0,
+      kills: 0,
+      combo: 0,
+      comboTimer: 0,
+      gameOver: false,
+      paused: false,
+      spawnTimer: 0,
+      spawnInterval: 2500,
+      difficulty: 1,
+      keys: {},
+      player: null,
+      entities: [],
+      items: [],
+      map: null,
+      attackCooldown: 0,
+      aoeCooldown: 0,
+      gameTime: 0,
+      partyMode: false,
+      onGameOver: null,
+      recentDamage: [],
+
+      particles: [],
+      floatingTexts: [],
+      ambientParticles: [],
+      screenShake: { x: 0, y: 0, intensity: 0, duration: 0 },
+
+      monsterDefs: {
+        goblin: { hp: 12, damage: 4, speed: 350, xp: 5, behavior: 'chase', color: '#4a4' },
+        bat: { hp: 6, damage: 2, speed: 180, xp: 3, behavior: 'erratic', color: '#644' },
+        imp: { hp: 15, damage: 6, speed: 300, xp: 8, behavior: 'chase', color: '#f44' },
+        skeleton: { hp: 20, damage: 8, speed: 400, xp: 10, behavior: 'cautious', color: '#ddd' },
+        orc1: { hp: 30, damage: 10, speed: 450, xp: 15, behavior: 'aggressive', color: '#484' },
+        spider: { hp: 18, damage: 8, speed: 220, xp: 11, behavior: 'chase', color: '#444' },
+        ogre: { hp: 60, damage: 18, speed: 600, xp: 30, behavior: 'slow', color: '#864' },
+        giant: { hp: 120, damage: 25, speed: 800, xp: 50, behavior: 'slow', color: '#a86' },
+      },
+
+      waveMonsters: [
+        ['goblin', 'bat'],
+        ['goblin', 'bat', 'imp'],
+        ['imp', 'skeleton'],
+        ['skeleton', 'orc1', 'spider'],
+        ['orc1', 'spider', 'ogre'],
+        ['ogre', 'giant'],
+      ],
+
+      buffs: { speed: 0, strength: 0, shield: 0 },
+      equipment: { weapon: null, armor: null },
+      xp: 0,
+      level: 1,
+      xpToLevel: 50,
+
+      MAX_PARTICLES: 80,
+      MAX_FLOATING_TEXTS: 10,
+
+      init: function() {
+        this.display = new ROT.Display({
+          width: this.screenWidth,
+          height: this.screenHeight,
+          fontSize: 32,
+          fontFamily: 'monospace',
+          forceSquareRatio: true,
+          bg: '#000'
+        });
+
+        let gameArea = document.getElementById('game-area');
+        gameArea.innerHTML = '';
+        gameArea.appendChild(this.display.getContainer());
+
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = this.screenWidth * this.tileSize;
+        this.canvas.height = this.screenHeight * this.tileSize;
+        gameArea.appendChild(this.canvas);
+        this.ctx = this.canvas.getContext('2d');
+
+        this.statsPanel = document.getElementById('stats-panel');
+        this.combatLog = document.getElementById('combat-log');
+        this.combatLog.innerHTML = '';
+
+        this.restart();
+        this.setupInput();
+        this.lastTime = performance.now();
+        this.gameLoop();
+      },
+
+      setupInput: function() {
+        window.addEventListener('keydown', (e) => {
+          if (this.gameOver) return;
+          this.keys[e.code] = true;
+        });
+        window.addEventListener('keyup', (e) => this.keys[e.code] = false);
+      },
+
+      restart: function() {
+        this.score = 0;
+        this.kills = 0;
+        this.combo = 0;
+        this.difficulty = 1;
+        this.spawnInterval = 2500;
+        this.gameOver = false;
+        this.gameTime = 0;
+        this.entities = [];
+        this.items = [];
+        this.particles = [];
+        this.floatingTexts = [];
+        this.aoeCooldown = 0;
+        this.recentDamage = [];
+        this.generateArena();
+        this.spawnPlayer();
+      },
+
+      generateArena: function() {
+        this.map = [];
+        for (let x = 0; x < this.screenWidth; x++) {
+          this.map[x] = [];
+          for (let y = 0; y < this.screenHeight; y++) {
+            let isWall = x === 0 || x === this.screenWidth - 1 || y === 0 || y === this.screenHeight - 1;
+            this.map[x][y] = {
+              symbol: isWall ? '#' : '.',
+              blocked: isWall,
+              color: isWall ? '#444' : '#222'
+            };
+          }
+        }
+      },
+
+      spawnPlayer: function() {
+        this.player = {
+          x: Math.floor(this.screenWidth / 2),
+          y: Math.floor(this.screenHeight / 2),
+          hp: 100,
+          maxHp: 100,
+          damage: 10,
+          defense: 2,
+          symbol: '@',
+          flash: 0
+        };
+        this.player.visualX = this.player.x;
+        this.player.visualY = this.player.y;
+      },
+
+      gameLoop: function() {
+        let now = performance.now();
+        this.deltaTime = Math.min(now - this.lastTime, 50);
+        this.lastTime = now;
+
+        if (!this.gameOver && !this.paused) {
+          this.update();
+        }
+        this.draw();
+
+        requestAnimationFrame(() => this.gameLoop());
+      },
+
+      update: function() {
+        this.gameTime += this.deltaTime;
+        this.handleInput();
+        this.updateEntities();
+        this.updatePlayer();
+        this.handleSpawning();
+        this.updateDifficulty();
+        this.updateEffects();
+      },
+
+      handleInput: function() {
+        if (this.player.stunned > 0) return;
+
+        let dx = 0, dy = 0;
+        let speed = this.player.slowed > 0 ? 180 : 120;
+
+        this.attackCooldown -= this.deltaTime;
+        if (this.attackCooldown > 0) return;
+
+        if (this.keys['KeyW'] || this.keys['ArrowUp']) dy = -1;
+        if (this.keys['KeyS'] || this.keys['ArrowDown']) dy = 1;
+        if (this.keys['KeyA'] || this.keys['ArrowLeft']) dx = -1;
+        if (this.keys['KeyD'] || this.keys['ArrowRight']) dx = 1;
+
+        // Attack keys
+        if (this.keys['KeyH'] || this.keys['KeyX'] || this.keys['Space']) {
+          this.playerAttack();
+          this.attackCooldown = 200;
+          return;
+        }
+
+        // AOE attack
+        if ((this.keys['KeyJ'] || this.keys['KeyC']) && this.aoeCooldown <= 0) {
+          this.aoeAttack();
+          return;
+        }
+
+        if (dx !== 0 || dy !== 0) {
+          this.movePlayer(dx, dy);
+          this.attackCooldown = speed;
+        }
+      },
+
+      movePlayer: function(dx, dy) {
+        let nx = this.player.x + dx;
+        let ny = this.player.y + dy;
+
+        // Attack if enemy there
+        let target = this.getEntityAt(nx, ny);
+        if (target) {
+          this.attack(this.player, target);
+          return;
+        }
+
+        if (this.canMove(nx, ny)) {
+          this.player.x = nx;
+          this.player.y = ny;
+          this.pickupItems();
+        }
+      },
+
+      playerAttack: function() {
+        let closest = null;
+        let minDist = 999;
+
+        for (let e of this.entities) {
+          let dist = Math.abs(e.x - this.player.x) + Math.abs(e.y - this.player.y);
+          if (dist <= 2 && dist < minDist) {
+            minDist = dist;
+            closest = e;
+          }
+        }
+
+        if (closest) {
+          this.attack(this.player, closest);
+        }
+      },
+
+      aoeAttack: function() {
+        this.aoeCooldown = 3000;
+        this.createRingEffect(this.player.x, this.player.y, '#f80', 80);
+
+        for (let e of [...this.entities]) {
+          let dist = Math.abs(e.x - this.player.x) + Math.abs(e.y - this.player.y);
+          if (dist <= 2) {
+            let damage = Math.floor(this.player.damage * 0.8);
+            e.hp -= damage;
+            this.addFloatingText(e.x, e.y, `-${damage}`, '#f80');
+            if (e.hp <= 0) this.killEntity(e);
+          }
+        }
+      },
+
+      attack: function(attacker, target) {
+        let damage = attacker.damage + Math.floor(Math.random() * 4);
+        let isCrit = Math.random() < 0.15;
+        if (isCrit) damage *= 2;
+
+        if (target === this.player) {
+          damage = Math.max(1, damage - this.player.defense);
+        }
+
+        target.hp -= damage;
+        target.flash = 150;
+
+        let attackerName = attacker === this.player ? 'You' : attacker.symbol;
+
+        if (attacker === this.player) {
+          this.addCombatLog(`Hit ${target.symbol} for ${damage}${isCrit ? ' CRIT!' : ''}`, isCrit ? '#ff0' : '#4f4');
+        } else {
+          this.addCombatLog(`${attackerName} hits you for ${damage}`, '#f44');
+          this.trackDamage(attackerName, damage, 'melee');
+        }
+
+        this.createBurstParticles(target.x, target.y, isCrit ? '#ff0' : '#f44', 8, 80);
+        this.addFloatingText(target.x, target.y, `-${damage}`, isCrit ? '#ff0' : '#f44');
+        this.triggerShake(isCrit ? 10 : 4);
+
+        if (target.hp <= 0) {
+          if (target !== this.player) {
+            this.killEntity(target);
+          } else {
+            this.playerDeath();
+          }
+        }
+      },
+
+      trackDamage: function(source, damage, type) {
+        this.recentDamage.push({ source, damage, type, time: this.gameTime });
+        if (this.recentDamage.length > 8) this.recentDamage.shift();
+      },
+
+      killEntity: function(entity) {
+        this.createBurstParticles(entity.x, entity.y, '#fff', 12, 120);
+        let def = this.monsterDefs[entity.symbol] || { xp: 5 };
+        let xpGain = def.xp + this.difficulty * 2;
+
+        this.addCombatLog(`Killed ${entity.symbol}! +${xpGain}xp`, '#ff0');
+        this.entities = this.entities.filter(e => e !== entity);
+        this.kills++;
+        this.score += 10 * this.difficulty + xpGain;
+        this.combo++;
+        this.comboTimer = 2500;
+
+        this.xp += xpGain;
+        if (this.xp >= this.xpToLevel) this.levelUp();
+
+        // Drop item
+        if (Math.random() < 0.2) this.dropItem(entity.x, entity.y);
+      },
+
+      levelUp: function() {
+        this.level++;
+        this.xp = 0;
+        this.xpToLevel = Math.floor(this.xpToLevel * 1.5);
+        this.player.maxHp += 10;
+        this.player.hp = Math.min(this.player.hp + 20, this.player.maxHp);
+        this.player.damage += 2;
+        this.addCombatLog(`LEVEL UP! Now level ${this.level}`, '#ff0');
+        this.createRingEffect(this.player.x, this.player.y, '#ff0', 60);
+      },
+
+      playerDeath: function() {
+        this.gameOver = true;
+        this.createBurstParticles(this.player.x, this.player.y, '#f00', 40, 150);
+        this.addFloatingText(this.player.x, this.player.y, 'GAME OVER', '#f00', 3000);
+        this.triggerShake(20);
+
+        // Callback for party mode
+        if (this.partyMode && this.onGameOver) {
+          setTimeout(() => {
+            this.onGameOver(this.score, this.difficulty, this.kills);
+          }, 1500);
+        }
+      },
+
+      updatePlayer: function() {
+        if (!this.player) return;
+        if (this.player.hp <= 0 && !this.gameOver) {
+          this.playerDeath();
+          return;
+        }
+        this.player.visualX += (this.player.x - this.player.visualX) * 0.25;
+        this.player.visualY += (this.player.y - this.player.visualY) * 0.25;
+      },
+
+      updateEntities: function() {
+        for (let e of this.entities) {
+          e.moveTimer -= this.deltaTime;
+          if (e.moveTimer > 0) {
+            e.visualX += (e.x - e.visualX) * 0.3;
+            e.visualY += (e.y - e.visualY) * 0.3;
+            continue;
+          }
+
+          let dx = Math.sign(this.player.x - e.x);
+          let dy = Math.sign(this.player.y - e.y);
+
+          // Attack if adjacent
+          if (Math.abs(this.player.x - e.x) <= 1 && Math.abs(this.player.y - e.y) <= 1) {
+            this.attack(e, this.player);
+            e.moveTimer = e.speed;
+          } else {
+            let nx = e.x + dx;
+            let ny = e.y + dy;
+            if (this.canMove(nx, ny) && !this.getEntityAt(nx, ny)) {
+              e.x = nx;
+              e.y = ny;
+            }
+            e.moveTimer = e.speed;
+          }
+
+          e.visualX += (e.x - e.visualX) * 0.3;
+          e.visualY += (e.y - e.visualY) * 0.3;
+        }
+      },
+
+      handleSpawning: function() {
+        this.spawnTimer += this.deltaTime;
+        if (this.spawnTimer >= this.spawnInterval) {
+          this.spawnTimer = 0;
+          this.spawnMonster();
+        }
+      },
+
+      spawnMonster: function() {
+        let edge = Math.floor(Math.random() * 4);
+        let x, y;
+        switch(edge) {
+          case 0: x = 1 + Math.floor(Math.random() * (this.screenWidth - 2)); y = 1; break;
+          case 1: x = 1 + Math.floor(Math.random() * (this.screenWidth - 2)); y = this.screenHeight - 2; break;
+          case 2: x = 1; y = 1 + Math.floor(Math.random() * (this.screenHeight - 2)); break;
+          case 3: x = this.screenWidth - 2; y = 1 + Math.floor(Math.random() * (this.screenHeight - 2)); break;
+        }
+
+        if (this.getEntityAt(x, y)) return;
+
+        let waveIdx = Math.min(this.difficulty - 1, this.waveMonsters.length - 1);
+        let available = this.waveMonsters[waveIdx];
+        let symbol = available[Math.floor(Math.random() * available.length)];
+        let def = this.monsterDefs[symbol] || { hp: 15, damage: 5, speed: 350 };
+
+        this.entities.push({
+          x, y, visualX: x, visualY: y,
+          hp: Math.floor(def.hp * (1 + this.difficulty * 0.1)),
+          maxHp: Math.floor(def.hp * (1 + this.difficulty * 0.1)),
+          damage: Math.floor(def.damage * (1 + this.difficulty * 0.1)),
+          speed: Math.max(200, def.speed - this.difficulty * 20),
+          moveTimer: 0,
+          symbol: symbol,
+          color: def.color || '#f44',
+          flash: 0
+        });
+      },
+
+      updateDifficulty: function() {
+        let newDiff = 1 + Math.floor(this.kills / 10);
+        if (newDiff > this.difficulty) {
+          this.difficulty = newDiff;
+          this.spawnInterval = Math.max(1000, 2500 - this.difficulty * 150);
+          this.addCombatLog(`Wave ${this.difficulty}!`, '#f80');
+        }
+      },
+
+      updateEffects: function() {
+        // Combo decay
+        if (this.comboTimer > 0) {
+          this.comboTimer -= this.deltaTime;
+          if (this.comboTimer <= 0) this.combo = 0;
+        }
+
+        // Particles
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          let p = this.particles[i];
+          p.life -= this.deltaTime;
+          if (p.life <= 0) {
+            this.particles.splice(i, 1);
+            continue;
+          }
+          p.x += p.vx * this.deltaTime / 1000;
+          p.y += p.vy * this.deltaTime / 1000;
+          if (p.type === 'ring') {
+            p.currentRadius += (p.targetRadius - p.currentRadius) * 0.1;
+          }
+        }
+
+        // Floating texts
+        for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+          let t = this.floatingTexts[i];
+          t.life -= this.deltaTime;
+          if (t.life <= 0) {
+            this.floatingTexts.splice(i, 1);
+            continue;
+          }
+          t.y -= 0.02;
+        }
+
+        // Screen shake
+        if (this.screenShake.duration > 0) {
+          this.screenShake.x = (Math.random() - 0.5) * this.screenShake.intensity;
+          this.screenShake.y = (Math.random() - 0.5) * this.screenShake.intensity;
+          this.screenShake.duration -= this.deltaTime;
+        } else {
+          this.screenShake.x = 0;
+          this.screenShake.y = 0;
+        }
+
+        // Flash timers
+        if (this.player && this.player.flash > 0) this.player.flash -= this.deltaTime;
+        for (let e of this.entities) {
+          if (e.flash > 0) e.flash -= this.deltaTime;
+        }
+      },
+
+      draw: function() {
+        let container = this.display.getContainer();
+        container.style.transform = `translate(${this.screenShake.x}px, ${this.screenShake.y}px)`;
+        this.canvas.style.transform = `translate(${this.screenShake.x}px, ${this.screenShake.y}px)`;
+
+        // Map
+        for (let x = 0; x < this.screenWidth; x++) {
+          for (let y = 0; y < this.screenHeight; y++) {
+            this.display.draw(x, y, this.map[x][y].symbol, '#0000');
+          }
+        }
+
+        // Items
+        for (let item of this.items) {
+          this.display.draw(item.x, item.y, [this.map[item.x][item.y].symbol, item.symbol], ['#0000', '#fff']);
+        }
+
+        // Entities
+        for (let e of this.entities) {
+          let flashColor = e.flash > 0 ? '#fff8' : '#0000';
+          this.display.draw(Math.round(e.visualX), Math.round(e.visualY),
+            [this.map[e.x][e.y].symbol, e.symbol], ['#0000', flashColor]);
+        }
+
+        // Player
+        if (this.player && this.player.hp > 0) {
+          let flashColor = this.player.flash > 0 ? '#fff8' : '#0000';
+          this.display.draw(Math.round(this.player.visualX), Math.round(this.player.visualY),
+            [this.map[this.player.x][this.player.y].symbol, '@'], ['#0000', flashColor]);
+        }
+
+        // Canvas effects
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Ring effects
+        for (let p of this.particles) {
+          if (p.type === 'ring') {
+            let alpha = p.life / p.maxLife;
+            this.ctx.globalAlpha = alpha * 0.6;
+            this.ctx.strokeStyle = p.color;
+            this.ctx.lineWidth = 3 * alpha;
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, p.currentRadius, 0, Math.PI * 2);
+            this.ctx.stroke();
+          }
+        }
+
+        // Regular particles
+        for (let p of this.particles) {
+          if (p.type === 'ring') continue;
+          let alpha = p.life / p.maxLife;
+          this.ctx.globalAlpha = alpha;
+          this.ctx.fillStyle = p.color;
+          this.ctx.beginPath();
+          this.ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+
+        // Floating texts
+        this.ctx.textAlign = 'center';
+        for (let t of this.floatingTexts) {
+          let alpha = Math.min(1, t.life / 500);
+          this.ctx.globalAlpha = alpha;
+          this.ctx.fillStyle = t.color;
+          this.ctx.font = `bold ${t.size || 16}px monospace`;
+          this.ctx.fillText(t.text, t.x * this.tileSize + this.tileSize / 2, t.y * this.tileSize + this.tileSize / 2);
+        }
+
+        this.ctx.globalAlpha = 1;
+        this.updateHUD();
+      },
+
+      updateHUD: function() {
+        let hpPct = Math.max(0, (this.player.hp / this.player.maxHp) * 100);
+        let xpPct = (this.xp / this.xpToLevel) * 100;
+
+        let html = `
+          <div style="font-size:18px;color:#ff0;margin-bottom:10px;">SCORE: ${this.score}</div>
+          <div style="margin-bottom:15px;">
+            <div style="color:#f44;margin-bottom:3px;">HP: ${this.player.hp}/${this.player.maxHp}</div>
+            <div style="background:#300;border-radius:4px;height:20px;overflow:hidden;">
+              <div style="background:linear-gradient(180deg,#f44,#a22);width:${hpPct}%;height:100%;"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:15px;margin-bottom:10px;">
+            <div><span style="color:#888;">Level</span> <span style="color:#4af;">${this.level}</span></div>
+            <div><span style="color:#888;">Wave</span> <span style="color:#f80;">${this.difficulty}</span></div>
+          </div>
+          <div style="color:#888;font-size:11px;">
+            Kills: ${this.kills} | Combo: ${this.combo}x
+          </div>
+        `;
+
+        if (this.gameOver) {
+          let deathRecap = '';
+          if (this.recentDamage.length > 0) {
+            let last = this.recentDamage.slice(-3).reverse();
+            deathRecap = `
+              <div style="background:#200;border:1px solid #400;border-radius:6px;padding:8px;margin:15px 0;">
+                <div style="color:#f44;font-size:11px;margin-bottom:5px;">KILLED BY:</div>
+                ${last.map((d, i) => `<div style="color:${i === 0 ? '#f88' : '#888'};font-size:${i === 0 ? '14px' : '11px'};">${d.source}: ${d.damage}</div>`).join('')}
+              </div>
+            `;
+          }
+
+          html = `
+            <div style="text-align:center;">
+              <div style="color:#f00;font-size:24px;margin-bottom:10px;">GAME OVER</div>
+              <div style="color:#ff0;font-size:20px;margin-bottom:5px;">Score: ${this.score}</div>
+              <div style="color:#aaa;margin-bottom:5px;">Wave ${this.difficulty} | ${this.kills} kills</div>
+              ${deathRecap}
+              <div style="color:#888;font-size:12px;margin-top:15px;">Waiting for next player...</div>
+            </div>
+          `;
+        }
+
+        this.statsPanel.innerHTML = html;
+      },
+
+      // Helper functions
+      canMove: function(x, y) {
+        if (x < 0 || x >= this.screenWidth || y < 0 || y >= this.screenHeight) return false;
+        return !this.map[x][y].blocked;
+      },
+
+      getEntityAt: function(x, y) {
+        return this.entities.find(e => e.x === x && e.y === y);
+      },
+
+      pickupItems: function() {
+        for (let i = this.items.length - 1; i >= 0; i--) {
+          let item = this.items[i];
+          if (item.x === this.player.x && item.y === this.player.y) {
+            if (item.effect === 'heal') {
+              this.player.hp = Math.min(this.player.maxHp, this.player.hp + item.value);
+              this.addCombatLog(`+${item.value} HP!`, '#4f4');
+            }
+            this.items.splice(i, 1);
+            this.createBurstParticles(this.player.x, this.player.y, '#4f4', 8, 60);
+          }
+        }
+      },
+
+      dropItem: function(x, y) {
+        this.items.push({
+          x, y, symbol: '+', effect: 'heal', value: 20, color: '#f44'
+        });
+      },
+
+      createBurstParticles: function(x, y, color, count, speed) {
+        if (this.particles.length >= this.MAX_PARTICLES) return;
+        count = Math.min(count, this.MAX_PARTICLES - this.particles.length);
+        let cx = x * this.tileSize + this.tileSize / 2;
+        let cy = y * this.tileSize + this.tileSize / 2;
+        for (let i = 0; i < count; i++) {
+          let angle = (i / count) * Math.PI * 2;
+          this.particles.push({
+            x: cx, y: cy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 300, maxLife: 300, size: 3, color
+          });
+        }
+      },
+
+      createRingEffect: function(x, y, color, radius) {
+        this.particles.push({
+          x: x * this.tileSize + this.tileSize / 2,
+          y: y * this.tileSize + this.tileSize / 2,
+          vx: 0, vy: 0, life: 300, maxLife: 300,
+          size: 5, targetRadius: radius, currentRadius: 0,
+          color, type: 'ring'
+        });
+      },
+
+      addFloatingText: function(x, y, text, color, duration) {
+        if (this.floatingTexts.length >= this.MAX_FLOATING_TEXTS) return;
+        this.floatingTexts.push({
+          x, y, text, color, life: duration || 800, size: 16
+        });
+      },
+
+      triggerShake: function(intensity) {
+        this.screenShake.intensity = intensity;
+        this.screenShake.duration = 200;
+      },
+
+      addCombatLog: function(msg, color) {
+        let entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.style.color = color || '#aaa';
+        entry.textContent = msg;
+        this.combatLog.insertBefore(entry, this.combatLog.firstChild);
+        while (this.combatLog.children.length > 50) {
+          this.combatLog.removeChild(this.combatLog.lastChild);
+        }
+      }
+    };
+  </script>
+</body>
+</html>
