@@ -1,0 +1,33 @@
+{
+  "name": "arena-megaeth",
+  "version": "1.0.0",
+  "description": "> Browser roguelike with instant on-chain leaderboard (10ms confirmations)",
+  "main": "sw.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/exhuman777/arena-megaeth.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/exhuman777/arena-megaeth/issues"
+  },
+  "homepage": "https://github.com/exhuman777/arena-megaeth#readme",
+  "dependencies": {
+    "@privy-io/react-auth": "^3.13.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "viem": "^2.45.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.3",
+    "vite": "^7.3.1"
+  }
+}

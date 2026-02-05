@@ -4,6 +4,7 @@
 
 [![Solidity](https://img.shields.io/badge/Solidity-0.8-363636)](https://soliditylang.org/)
 [![MegaETH](https://img.shields.io/badge/MegaETH-Testnet-purple)](https://megaeth.com/)
+[![Privy](https://img.shields.io/badge/Privy-Auth-blue)](https://privy.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 Browser-based roguelike dungeon crawler with **on-chain leaderboard on MegaETH**.
@@ -16,11 +17,28 @@ Features instant score submissions using `eth_sendRawTransactionSync` (EIP-7966)
 1. Open `arena.html` in browser
 2. Works offline with localStorage
 
-### Play with On-Chain Leaderboard
+### Play with On-Chain Leaderboard (MetaMask)
 1. Deploy contract to MegaETH testnet (see below)
 2. Set contract address in browser: `localStorage.setItem('ARENA_CONTRACT', '0x...')`
 3. Connect MetaMask to MegaETH Testnet
 4. Play - scores submit instantly on death!
+
+### Play with Privy Auth (Email/Social/Wallet)
+
+Privy enables login via email, Google, Twitter, Discord, or wallet - and creates embedded wallets for users who don't have one.
+
+```bash
+# Install dependencies
+npm install
+
+# Set your Privy App ID in src/App.jsx
+# Get one free at https://dashboard.privy.io
+
+# Run dev server
+npm run dev
+
+# Open http://localhost:3000
+```
 
 ## MegaETH Integration
 
@@ -97,12 +115,16 @@ Visit: https://faucet.timothy.megaeth.com
 - **Permadeath** - Each run is unique
 - **On-Chain Leaderboard** - Scores stored on MegaETH, instant confirmation
 - **Party Mode** - 1-6 players local co-op
+- **Privy Auth** - Login with email, social, or wallet (embedded wallets for new users)
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `arena.html` | Main game page |
+| `arena.html` | Main game page (MetaMask only) |
+| `index-privy.html` | Privy-enabled game page |
+| `src/App.jsx` | React app with Privy auth |
+| `src/privy-config.js` | Privy + MegaETH chain config |
 | `assets/arena.js` | Game loop, rendering, combat |
 | `assets/megaeth.js` | MegaETH wallet + contract integration |
 | `contracts/src/ArenaLeaderboard.sol` | On-chain leaderboard |

@@ -49,6 +49,7 @@ const MegaETH = {
   signer: null,
   contract: null,
   account: null,
+  usePrivy: false, // Flag for Privy vs MetaMask
 
   /**
    * Initialize MegaETH connection
@@ -59,7 +60,21 @@ const MegaETH = {
       this.leaderboardAddress = contractAddress;
     }
 
-    // Check if any wallet is available
+    // Listen for Privy connection
+    window.addEventListener('privy-connected', async (e) => {
+      console.log('MegaETH: Privy wallet connected', e.detail.address);
+      this.usePrivy = true;
+      await this.connectPrivy();
+    });
+
+    // Check if Privy wallet is already available
+    if (window.PrivyWallet) {
+      console.log('MegaETH: Privy wallet detected');
+      this.usePrivy = true;
+      return true;
+    }
+
+    // Check if any browser wallet is available
     const provider = this.getProvider();
     if (!provider) {
       console.log('MegaETH: No wallet detected');
@@ -68,6 +83,37 @@ const MegaETH = {
 
     console.log('MegaETH: Wallet detected', provider.isMetaMask ? 'MetaMask' : 'Other');
     return true; // Don't auto-connect, wait for user click
+  },
+
+  /**
+   * Connect using Privy wallet
+   */
+  async connectPrivy() {
+    if (!window.PrivyWallet) {
+      throw new Error('Privy wallet not available');
+    }
+
+    try {
+      this.provider = window.PrivyWallet.provider;
+      this.signer = await window.PrivyWallet.getSigner();
+      this.account = window.PrivyWallet.address;
+
+      // Set up contract
+      if (this.leaderboardAddress) {
+        this.contract = new ethers.Contract(
+          this.leaderboardAddress,
+          this.leaderboardABI,
+          this.signer
+        );
+      }
+
+      console.log('MegaETH: Connected via Privy to', this.config[this.network].name);
+      this.updateUI();
+      return true;
+    } catch (error) {
+      console.error('MegaETH: Privy connection error', error);
+      throw error;
+    }
   },
 
   /**
