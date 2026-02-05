@@ -43,33 +43,22 @@ export const megaethMainnet = {
 
 // Privy configuration
 export const privyConfig = {
-  // Login methods - email, wallet, social
-  loginMethods: ['email', 'wallet', 'google', 'twitter', 'discord'],
+  // Login methods
+  loginMethods: ['email', 'wallet'],
 
   // Appearance
   appearance: {
     theme: 'dark',
     accentColor: '#ff3333',
-    logo: 'https://arena.megaeth.com/assets/icon-192.png', // Update with your logo
-    landingHeader: 'Arena Survival',
-    loginMessage: 'Sign in to compete on the MegaETH leaderboard',
   },
 
-  // Embedded wallets - create for users without wallets
+  // Embedded wallets
   embeddedWallets: {
-    createOnLogin: 'users-without-wallets',
-    noPromptOnSignature: false,
+    createOnLogin: 'all-users',
   },
 
   // Supported chains
-  defaultChain: megaethTestnet,
-  supportedChains: [megaethTestnet, megaethMainnet],
-
-  // Legal
-  legal: {
-    termsAndConditionsUrl: 'https://arena.megaeth.com/terms',
-    privacyPolicyUrl: 'https://arena.megaeth.com/privacy',
-  },
+  supportedChains: [megaethTestnet],
 };
 
 export default privyConfig;
