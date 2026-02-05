@@ -86,7 +86,7 @@ function HowToPlay({ onClose }) {
         <button onClick={onClose} style={setupStyles.closeBtn}>×</button>
 
         <h1 style={setupStyles.title}>How to Play</h1>
-        <p style={setupStyles.subtitle}>Survive waves of monsters. Get the highest score.</p>
+        <p style={setupStyles.subtitle}>Survive endless waves. Get the highest score.</p>
 
         <div style={setupStyles.section}>
           <h2 style={setupStyles.sectionTitle}>Movement</h2>
@@ -111,25 +111,21 @@ function HowToPlay({ onClose }) {
               </div>
             </div>
           </div>
-          <p style={howToPlayStyles.hint}>Move into enemies to attack them</p>
         </div>
 
         <div style={setupStyles.section}>
-          <h2 style={setupStyles.sectionTitle}>Actions</h2>
+          <h2 style={setupStyles.sectionTitle}>Combat</h2>
           <div style={howToPlayStyles.actionList}>
             <div style={howToPlayStyles.action}>
-              <span style={howToPlayStyles.key}>Z</span>
-              <span style={howToPlayStyles.actionText}>Wait / Rest</span>
+              <span style={howToPlayStyles.key}>X</span>
+              <span style={howToPlayStyles.actionText}>Attack nearby enemy</span>
             </div>
             <div style={howToPlayStyles.action}>
-              <span style={howToPlayStyles.key}>E</span>
-              <span style={howToPlayStyles.actionText}>Pick up item (auto on walk)</span>
-            </div>
-            <div style={howToPlayStyles.action}>
-              <span style={howToPlayStyles.keySmall}>1-9</span>
-              <span style={howToPlayStyles.actionText}>Use skills</span>
+              <span style={howToPlayStyles.key}>C</span>
+              <span style={howToPlayStyles.actionText}>AOE attack (area damage)</span>
             </div>
           </div>
+          <p style={howToPlayStyles.hint}>Or just walk into enemies to hit them</p>
         </div>
 
         <div style={setupStyles.section}>
@@ -137,13 +133,9 @@ function HowToPlay({ onClose }) {
           <ul style={howToPlayStyles.goalList}>
             <li>Kill monsters to earn points</li>
             <li>Survive as many waves as possible</li>
-            <li>Collect loot to get stronger</li>
-            <li>Top daily score wins the prize pool</li>
+            <li>Pick up loot to get stronger</li>
+            <li>Top daily score wins the prize pool!</li>
           </ul>
-        </div>
-
-        <div style={howToPlayStyles.tip}>
-          Tip: This is turn-based. Take your time to plan each move.
         </div>
 
         <button onClick={onClose} style={setupStyles.playBtn}>
@@ -865,34 +857,43 @@ const styles = {
     borderRadius: '8px',
     marginBottom: '12px',
     letterSpacing: '0.5px',
-    transition: 'opacity 0.2s',
+    transition: 'all 0.2s',
+    position: 'relative',
+    zIndex: 2,
+    boxShadow: '0 0 20px rgba(255,255,255,0.3)',
   },
   secondaryBtn: {
-    background: 'transparent',
-    border: '1px solid #333',
-    color: '#888',
+    background: 'rgba(30,30,30,0.9)',
+    border: '1px solid #444',
+    color: '#ccc',
     padding: '12px 24px',
     fontSize: '13px',
     fontFamily: 'inherit',
     cursor: 'pointer',
     borderRadius: '6px',
     transition: 'all 0.2s',
+    position: 'relative',
+    zIndex: 2,
   },
   btnRow: {
     display: 'flex',
     gap: '12px',
     marginBottom: '32px',
+    position: 'relative',
+    zIndex: 2,
   },
   linkBtn: {
-    background: 'transparent',
-    border: 'none',
-    color: '#555',
-    padding: '8px 16px',
-    fontSize: '12px',
+    background: 'rgba(30,30,30,0.9)',
+    border: '1px solid #444',
+    color: '#ccc',
+    padding: '10px 20px',
+    fontSize: '13px',
     fontFamily: 'inherit',
     cursor: 'pointer',
-    textDecoration: 'underline',
-    textUnderlineOffset: '2px',
+    borderRadius: '6px',
+    position: 'relative',
+    zIndex: 2,
+    textDecoration: 'none',
   },
   logoutBtn: {
     background: 'transparent',
