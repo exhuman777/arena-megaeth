@@ -5,10 +5,12 @@ import { ethers } from 'ethers';
 
 const PRIVY_APP_ID = 'cml9c6av801zil40dnl2gqnhj';
 
-// V3 Contract
-const CONTRACT_ADDRESS = '0x9D7eb73DE7d8A309D2e10148584F623263058585';
+// V4 Contract - PAY BEFORE PLAY
+const CONTRACT_ADDRESS = '0x40E63CD7Bf404e00C2E6CE327001c9b5C15e0464';
 const CONTRACT_ABI = [
-  'function playGame(uint32 score, uint32 wave, uint32 kills, bytes16 name) external payable',
+  'function startGame() external payable',
+  'function submitScore(uint32 score, uint32 wave, uint32 kills, bytes16 name) external',
+  'function hasActiveGame(address player) external view returns (bool)',
   'function getTopScores(uint256 count) external view returns (tuple(address player, uint32 score, uint32 wave, uint32 kills, uint32 timestamp, bytes16 name)[])',
   'function getCurrentEpoch() external view returns (uint256 epochId, uint256 startTime, uint256 timeRemaining, uint256 prizePool, address currentLeader, uint32 topScore)',
   'function getPlayerStats(address player) external view returns (uint256 gamesPlayed, uint256 totalEarnings, uint256 bestScoreRank)',
@@ -102,7 +104,7 @@ function GameDashboard() {
     return addr.slice(0, 6) + '...' + addr.slice(-4);
   }
 
-  // Start game (pay and play)
+  // Start game (PAY FIRST, then play)
   const startGame = async () => {
     if (!activeWallet) return;
 
@@ -121,7 +123,18 @@ function GameDashboard() {
       const signer = await ethersProvider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
-      // Store for game use
+      // PAY FIRST: Call startGame() with 0.001 ETH
+      console.log('Paying entry fee...');
+      const payTx = await contract.startGame({
+        value: ethers.parseEther(ENTRY_FEE)
+      });
+      console.log('Payment TX sent:', payTx.hash);
+
+      // Wait for payment confirmation
+      await payTx.wait();
+      console.log('Payment confirmed! Starting game...');
+
+      // Store contract for score submission later
       window.gameWallet = {
         address: activeWallet.address,
         signer: signer,
@@ -143,11 +156,9 @@ function GameDashboard() {
             // Encode name as bytes16
             const nameBytes = ethers.encodeBytes32String(name.slice(0, 16)).slice(0, 34);
 
-            // Submit score with payment
-            const tx = await contract.playGame(score, wave, kills, nameBytes, {
-              value: ethers.parseEther(ENTRY_FEE)
-            });
-            console.log('Transaction sent:', tx.hash);
+            // Submit score (NO PAYMENT - already paid in startGame)
+            const tx = await contract.submitScore(score, wave, kills, nameBytes);
+            console.log('Score TX sent:', tx.hash);
 
             // Wait for confirmation
             const receipt = await tx.wait();
@@ -245,7 +256,7 @@ function GameDashboard() {
       <div style={styles.gameContainer}>
         <div style={styles.gameHeader}>
           <span style={{color: '#0f0'}}>● {formatAddr(activeWallet?.address)}</span>
-          <span style={{color: '#ff0'}}>Fee: {ENTRY_FEE} ETH</span>
+          <span style={{color: '#0f0'}}>✓ PAID {ENTRY_FEE} ETH</span>
           <span style={{color: '#0ff'}}>Pool: {epoch?.prizePool || '0'} ETH</span>
           <button onClick={() => { setIsPlaying(false); window.location.reload(); }} style={styles.backButton}>← Back</button>
         </div>
@@ -287,7 +298,7 @@ function GameDashboard() {
       )}
 
       <button onClick={startGame} disabled={loading} style={styles.playButton}>
-        {loading ? '⏳ CONNECTING...' : '🎮 PLAY GAME (0.001 ETH)'}
+        {loading ? '⏳ PAYING ENTRY FEE...' : '🎮 PAY & PLAY (0.001 ETH)'}
       </button>
 
       {error && <div style={styles.error}>{error}</div>}
