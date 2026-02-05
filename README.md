@@ -1,5 +1,11 @@
 # Arena Survival - MegaETH Edition
 
+> Browser roguelike with instant on-chain leaderboard (10ms confirmations)
+
+[![Solidity](https://img.shields.io/badge/Solidity-0.8-363636)](https://soliditylang.org/)
+[![MegaETH](https://img.shields.io/badge/MegaETH-Testnet-purple)](https://megaeth.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 Browser-based roguelike dungeon crawler with **on-chain leaderboard on MegaETH**.
 
 Features instant score submissions using `eth_sendRawTransactionSync` (EIP-7966) - confirmations in <10ms.
@@ -128,6 +134,12 @@ Following [megaeth-ai-developer-skills](https://github.com/0xBreadguy/megaeth-ai
 
 MIT
 
+## Demo
+
+Play now: Open `arena.html` in your browser (works offline!)
+
+For on-chain leaderboard, connect to MegaETH testnet.
+
 ---
 
-*Built for MegaETH. Tiles from DCSS.*
+Built by [Exhuman](https://github.com/exhuman777) | Tiles from DCSS
