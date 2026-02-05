@@ -70,12 +70,32 @@ forge script script/Deploy.s.sol \
 
 Visit: https://faucet.timothy.megaeth.com
 
-### Contract Features
+### Contract Features (V3)
 
-- **Fixed-size leaderboard** (100 entries) - avoids expensive SSTORE costs
-- **Binary search insertion** - O(log n) position finding
-- **block.timestamp accessed late** - avoids MegaETH volatile data limits
+- **0.001 ETH per game** - Entry fee to play
+- **24h prize epochs** - Daily prize pool for top player
+- **95% to pool, 5% house** - Fair distribution
 - **Instant receipts** - uses `eth_sendRawTransactionSync`
+- **Fixed-size leaderboard** (100 entries) - gas efficient
+- **Binary search insertion** - O(log n) position finding
+
+### Tokenomics
+
+```
+Player pays 0.001 ETH per game
+        │
+        ├── 95% → Daily Prize Pool
+        │          │
+        │          └── Top scorer at 24h mark wins the pool
+        │
+        └── 5% → House (platform fee)
+```
+
+Each 24-hour epoch:
+1. Players submit scores (0.001 ETH each)
+2. Prize pool grows throughout the day
+3. At epoch end, #1 player can claim the entire pool
+4. Leaderboard resets, new epoch begins
 
 ## Architecture
 

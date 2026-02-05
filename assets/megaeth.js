@@ -26,22 +26,24 @@ const MegaETH = {
   // Current network (default testnet)
   network: 'testnet',
 
-  // V2 Contract address
-  leaderboardAddress: '0x01acFE50012710202B916886f86100c416578BA7',
+  // V3 Contract address (deploy and update this)
+  leaderboardAddress: '0x01acFE50012710202B916886f86100c416578BA7', // TODO: Update after V3 deploy
 
-  // Entry fee
-  ENTRY_FEE: '0.0001',
+  // Entry fee - 0.001 ETH per game
+  ENTRY_FEE: '0.001',
 
-  // V2 Contract ABI
+  // V3 Contract ABI - Daily prize pool mechanics
   leaderboardABI: [
-    'function submitScore(uint32 score, uint32 wave, uint32 kills, bytes16 name) external payable',
+    'function playGame(uint32 score, uint32 wave, uint32 kills, bytes16 name) external payable',
     'function getTopScores(uint256 count) external view returns (tuple(address player, uint32 score, uint32 wave, uint32 kills, uint32 timestamp, bytes16 name)[])',
     'function wouldMakeLeaderboard(uint32 score) external view returns (bool)',
     'function getEntryFee() external pure returns (uint256)',
-    'function getStats() external view returns (uint256 prizePool, uint256 totalGames, uint256 entryCount, uint256 entryFee)',
-    'function getKingInfo() external view returns (address king, uint256 score, uint256 earnings)',
-    'function getEarnings(address player) external view returns (uint256 pending, uint256 total)',
-    'function withdraw() external'
+    'function getStats() external view returns (uint256 prizePool, uint256 totalGames, uint256 entries, uint256 entryFee)',
+    'function getCurrentEpoch() external view returns (uint256 epochId, uint256 startTime, uint256 timeRemaining, uint256 prizePool, address currentLeader, uint32 topScore)',
+    'function getEpoch(uint256 epochId) external view returns (tuple(uint256 startTime, uint256 endTime, uint256 prizePool, address winner, uint32 winningScore, bool claimed))',
+    'function getPlayerStats(address player) external view returns (uint256 gamesPlayed, uint256 totalEarnings, uint256 bestScoreRank)',
+    'function claimPrize(uint256 epochId) external',
+    'function endEpoch() external'
   ],
 
   // Provider state
@@ -255,8 +257,9 @@ const MegaETH = {
   },
 
   /**
-   * Submit score - COSTS 0.0001 ETH
-   * 70% pool, 20% to king, 10% to house
+   * Submit score - COSTS 0.001 ETH
+   * 95% goes to daily prize pool, 5% house fee
+   * Top player at end of 24h epoch wins the pool
    */
   async submitScore(score, wave, kills, playerName) {
     if (!this.contract || !this.signer) {
@@ -266,8 +269,8 @@ const MegaETH = {
     // Pack player name as bytes16
     const nameBytes = ethers.encodeBytes32String(playerName.slice(0, 16)).slice(0, 34);
 
-    // Send with entry fee
-    const tx = await this.contract.submitScore(
+    // Send with entry fee (0.001 ETH)
+    const tx = await this.contract.playGame(
       score,
       wave,
       kills,
@@ -278,6 +281,78 @@ const MegaETH = {
     const receipt = await tx.wait();
     console.log('MegaETH: Score submitted!', receipt);
     return receipt;
+  },
+
+  /**
+   * Get current epoch info (daily prize pool)
+   */
+  async getCurrentEpoch() {
+    const cfg = this.config[this.network];
+    const iface = new ethers.Interface(this.leaderboardABI);
+    const data = iface.encodeFunctionData('getCurrentEpoch', []);
+
+    const response = await fetch(cfg.rpc, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'eth_call',
+        params: [{ to: this.leaderboardAddress, data }, 'latest'],
+        id: 1
+      })
+    });
+
+    const result = await response.json();
+    if (result.error) throw new Error(result.error.message);
+
+    const decoded = iface.decodeFunctionResult('getCurrentEpoch', result.result);
+    return {
+      epochId: Number(decoded[0]),
+      startTime: Number(decoded[1]),
+      timeRemaining: Number(decoded[2]),
+      prizePool: ethers.formatEther(decoded[3]),
+      currentLeader: decoded[4],
+      topScore: Number(decoded[5])
+    };
+  },
+
+  /**
+   * Claim prize for a completed epoch
+   */
+  async claimPrize(epochId) {
+    if (!this.contract) throw new Error('Not connected');
+    const tx = await this.contract.claimPrize(epochId);
+    return await tx.wait();
+  },
+
+  /**
+   * Get player stats
+   */
+  async getPlayerStats(address) {
+    const cfg = this.config[this.network];
+    const iface = new ethers.Interface(this.leaderboardABI);
+    const data = iface.encodeFunctionData('getPlayerStats', [address]);
+
+    const response = await fetch(cfg.rpc, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'eth_call',
+        params: [{ to: this.leaderboardAddress, data }, 'latest'],
+        id: 1
+      })
+    });
+
+    const result = await response.json();
+    if (result.error) throw new Error(result.error.message);
+
+    const decoded = iface.decodeFunctionResult('getPlayerStats', result.result);
+    return {
+      gamesPlayed: Number(decoded[0]),
+      totalEarnings: ethers.formatEther(decoded[1]),
+      bestScoreRank: Number(decoded[2])
+    };
   },
 
   /**
@@ -312,71 +387,13 @@ const MegaETH = {
   },
 
   /**
-   * Get current king info
+   * Format time remaining as HH:MM:SS
    */
-  async getKingInfo() {
-    const cfg = this.config[this.network];
-    const iface = new ethers.Interface(this.leaderboardABI);
-    const data = iface.encodeFunctionData('getKingInfo', []);
-
-    const response = await fetch(cfg.rpc, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'eth_call',
-        params: [{ to: this.leaderboardAddress, data }, 'latest'],
-        id: 1
-      })
-    });
-
-    const result = await response.json();
-    if (result.error) throw new Error(result.error.message);
-
-    const decoded = iface.decodeFunctionResult('getKingInfo', result.result);
-    return {
-      king: decoded[0],
-      score: Number(decoded[1]),
-      earnings: ethers.formatEther(decoded[2])
-    };
-  },
-
-  /**
-   * Get player earnings
-   */
-  async getEarnings(address) {
-    const cfg = this.config[this.network];
-    const iface = new ethers.Interface(this.leaderboardABI);
-    const data = iface.encodeFunctionData('getEarnings', [address]);
-
-    const response = await fetch(cfg.rpc, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'eth_call',
-        params: [{ to: this.leaderboardAddress, data }, 'latest'],
-        id: 1
-      })
-    });
-
-    const result = await response.json();
-    if (result.error) throw new Error(result.error.message);
-
-    const decoded = iface.decodeFunctionResult('getEarnings', result.result);
-    return {
-      pending: ethers.formatEther(decoded[0]),
-      total: ethers.formatEther(decoded[1])
-    };
-  },
-
-  /**
-   * Withdraw earnings
-   */
-  async withdraw() {
-    if (!this.contract) throw new Error('Not connected');
-    const tx = await this.contract.withdraw();
-    return await tx.wait();
+  formatTimeRemaining(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   },
 
   /**
@@ -469,14 +486,24 @@ const MegaETH = {
   /**
    * Update UI status
    */
-  updateUI() {
+  async updateUI() {
     const status = document.getElementById('megaeth-status');
     if (!status) return;
 
     if (this.account) {
-      status.innerHTML = `<span style="color:#0f0">● ${this.formatAddress(this.account)}</span> | <span style="color:#ff0">Fee: ${this.ENTRY_FEE} ETH</span>`;
+      // Try to get epoch info
+      let epochInfo = '';
+      try {
+        const epoch = await this.getCurrentEpoch();
+        const timeLeft = this.formatTimeRemaining(epoch.timeRemaining);
+        epochInfo = ` | <span style="color:#0ff">Pool: ${parseFloat(epoch.prizePool).toFixed(4)} ETH</span> | <span style="color:#f0f">Ends: ${timeLeft}</span>`;
+      } catch (e) {
+        console.log('Could not fetch epoch info:', e);
+      }
+
+      status.innerHTML = `<span style="color:#0f0">● ${this.formatAddress(this.account)}</span> | <span style="color:#ff0">Fee: ${this.ENTRY_FEE} ETH</span>${epochInfo}`;
     } else {
-      status.innerHTML = `<button onclick="MegaETH.connect().catch(e=>alert(e.message))" style="background:#f33;border:none;color:#fff;padding:4px 12px;cursor:pointer;font-family:monospace;">Connect Wallet</button> <span style="color:#888">to compete on-chain</span>`;
+      status.innerHTML = `<button onclick="MegaETH.connect().catch(e=>alert(e.message))" style="background:#f33;border:none;color:#fff;padding:4px 12px;cursor:pointer;font-family:monospace;">Connect Wallet</button> <span style="color:#888">to compete on-chain (0.001 ETH/game, daily prizes!)</span>`;
     }
   }
 };
