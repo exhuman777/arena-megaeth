@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import { privyConfig, megaethTestnet } from './privy-config';
 import { ethers } from 'ethers';
+import RogueASCIIBg from './RogueASCIIBg';
 
 const PRIVY_APP_ID = 'cml9c6av801zil40dnl2gqnhj';
 
@@ -590,6 +591,7 @@ function GameDashboard() {
   if (!authenticated) {
     return (
       <div style={styles.container}>
+        <RogueASCIIBg />
         {showSetup && <SetupGuide onClose={() => setShowSetup(false)} />}
         {showHowToPlay && <HowToPlay onClose={() => setShowHowToPlay(false)} />}
 
@@ -652,6 +654,7 @@ function GameDashboard() {
 
   return (
     <div style={styles.container}>
+      <RogueASCIIBg />
       {showHowToPlay && <HowToPlay onClose={() => setShowHowToPlay(false)} />}
 
       <div style={styles.header}>
@@ -755,6 +758,8 @@ const styles = {
     fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
     color: '#fff',
     background: '#000',
+    position: 'relative',
+    zIndex: 1,
   },
   header: {
     display: 'flex',
@@ -785,12 +790,15 @@ const styles = {
     fontSize: '14px',
   },
   prizeCard: {
-    background: '#0a0a0a',
+    background: 'rgba(10,10,10,0.85)',
+    backdropFilter: 'blur(8px)',
     border: '1px solid #1a1a1a',
     borderRadius: '12px',
     padding: '24px 48px',
     textAlign: 'center',
     marginBottom: '24px',
+    position: 'relative',
+    zIndex: 2,
   },
   prizeLabel: {
     color: '#444',
@@ -973,6 +981,8 @@ const styles = {
     width: '100%',
     maxWidth: '400px',
     marginTop: '24px',
+    position: 'relative',
+    zIndex: 2,
   },
   lbHeader: {
     display: 'flex',
@@ -999,13 +1009,14 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     padding: '12px',
-    background: '#0a0a0a',
+    background: 'rgba(10,10,10,0.8)',
+    backdropFilter: 'blur(4px)',
     borderRadius: '6px',
     gap: '12px',
   },
   lbFirst: {
-    background: '#111',
-    border: '1px solid #222',
+    background: 'rgba(17,17,17,0.9)',
+    border: '1px solid #333',
   },
   lbHighlight: {
     background: '#0f1a0f',
