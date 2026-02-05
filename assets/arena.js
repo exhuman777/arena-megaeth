@@ -248,61 +248,16 @@ var ArenaGame = {
     }
   },
 
-  // Load equipped items and potions from server
+  // Simplified game - no server equipment, fresh start each game
   loadEquipment: async function() {
-    if (!this.token) return;
-    try {
-      const res = await fetch('http://localhost:3001/api/inventory', {
-        headers: { 'Authorization': `Bearer ${this.token}` }
-      });
-      const data = await res.json();
-      if (data.success && data.inventory) {
-        // Reset potion belt
-        this.potionBelt = [];
-
-        for (let item of data.inventory) {
-          const itemData = typeof item.item_data === 'string' ? JSON.parse(item.item_data) : item.item_data;
-
-          // Load equipped weapon/armor
-          if (item.equipped && item.item_data) {
-            if (item.item_type === 'weapon') {
-              this.equipment.weapon = {
-                name: item.item_name,
-                damage: itemData.damage || 0,
-                effect: itemData.effect,
-                color: itemData.color || '#fff',
-                rarity: itemData.rarity || 'common',
-                tier: itemData.tier || 1
-              };
-              console.log('Equipped weapon:', this.equipment.weapon);
-            } else if (item.item_type === 'armor') {
-              this.equipment.armor = {
-                name: item.item_name,
-                defense: itemData.defense || 0,
-                color: itemData.color || '#888',
-                rarity: itemData.rarity || 'common',
-                tier: itemData.tier || 1
-              };
-              console.log('Equipped armor:', this.equipment.armor);
-            }
-          }
-
-          // Load potions into belt (max 3)
-          if (item.item_type === 'potion' && this.potionBelt.length < 3) {
-            this.potionBelt.push({
-              id: item.id,
-              name: item.item_name,
-              effect: itemData.effect || 'heal',
-              value: itemData.value || 30,
-              color: itemData.color || '#f44'
-            });
-            console.log('Loaded potion:', item.item_name);
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load equipment:', err);
-    }
+    // Give player basic starting gear (resets each game)
+    this.equipment = {
+      weapon: { name: 'Rusty Sword', damage: 3, color: '#aaa', rarity: 'common', tier: 1 },
+      armor: { name: 'Cloth Tunic', defense: 1, color: '#654', rarity: 'common', tier: 1 }
+    };
+    this.potionBelt = [
+      { name: 'Health Potion', effect: 'heal', value: 30, color: '#f44' }
+    ];
   },
 
   // Biome themes - each is visually distinct
@@ -617,17 +572,7 @@ var ArenaGame = {
     // Remove from belt
     this.potionBelt.splice(index, 1);
 
-    // Consume from server inventory
-    if (this.token && potion.id) {
-      try {
-        await fetch(`http://localhost:3001/api/inventory/consume/${potion.id}`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${this.token}` }
-        });
-      } catch (err) {
-        console.error('Failed to consume potion:', err);
-      }
-    }
+    // Potions consumed locally (no server)
   },
 
   restart: async function() {
@@ -729,7 +674,7 @@ var ArenaGame = {
   },
 
   // Performance limits
-  MAX_PARTICLES: 120,
+  MAX_PARTICLES: 80, // Reduced for better performance
   MAX_PROJECTILES: 20,
   MAX_HAZARDS: 30,
   MAX_FLOATING_TEXTS: 15,
@@ -1597,68 +1542,14 @@ var ArenaGame = {
       }
     }
 
-    // Try server if authenticated
-    if (!this.token) {
-      this.addCombatLog(`💰 Earned ${goldEarned} gold! (local)`, '#ff0');
-      this.addCombatLog(`⭐ Earned ${xpEarned} XP! (local)`, '#4af');
-      return;
-    }
-
-    try {
-      const res = await fetch('http://localhost:3001/api/character/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.token}`
-        },
-        body: JSON.stringify({
-          score: this.score,
-          wave: this.difficulty,
-          kills: this.kills,
-          time_seconds: timeSeconds,
-          gold_earned: goldEarned,
-          xp_earned: xpEarned
-        })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        this.addCombatLog(`💰 Earned ${goldEarned} gold!`, '#ff0');
-        this.addCombatLog(`⭐ Earned ${xpEarned} XP!`, '#4af');
-        if (data.level_up) {
-          this.addCombatLog(`🎉 Character leveled up to ${data.new_level}!`, '#f80');
-        }
-      }
-    } catch (err) {
-      console.error('Failed to save to server, saved locally:', err);
-    }
+    // Stats saved locally only (simplified mode - no server)
+    this.addCombatLog(`💀 Final Score: ${this.score}`, '#ff0');
+    this.addCombatLog(`🗡️ Kills: ${this.kills} | Wave: ${this.difficulty}`, '#4af');
   },
 
   saveItemToInventory: async function(item) {
-    if (!this.token || !item) return;
-
-    try {
-      await fetch('http://localhost:3001/api/inventory/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.token}`
-        },
-        body: JSON.stringify({
-          item_type: item.type,
-          item_name: item.name,
-          item_data: {
-            damage: item.damage,
-            defense: item.defense,
-            effect: item.effect,
-            rarity: item.rarity,
-            tier: item.tier
-          }
-        })
-      });
-    } catch (err) {
-      console.error('Failed to save item:', err);
-    }
+    // Items not saved between games (simplified mode)
+    this.addCombatLog(`Found: ${item.name}`, item.color || '#fff');
   },
 
   canMove: function(x, y) {
@@ -1908,6 +1799,9 @@ var ArenaGame = {
   },
 
   spawnMonster: function() {
+    // Limit entities to prevent crashes
+    if (this.entities.length >= 25) return;
+
     // Spawn on edge
     let edge = Math.floor(Math.random() * 4);
     let x, y;
