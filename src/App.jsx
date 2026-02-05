@@ -6,7 +6,7 @@ import { ethers } from 'ethers';
 const PRIVY_APP_ID = 'cml9c6av801zil40dnl2gqnhj';
 
 // V4 Contract - PAY BEFORE PLAY
-const CONTRACT_ADDRESS = '0x40E63CD7Bf404e00C2E6CE327001c9b5C15e0464';
+const CONTRACT_ADDRESS = '0x6023678244e0E009B751e418436871dC52378946';
 const CONTRACT_ABI = [
   'function startGame() external payable',
   'function submitScore(uint32 score, uint32 wave, uint32 kills, bytes16 name) external',
@@ -21,6 +21,196 @@ const CONTRACT_ABI = [
 const ENTRY_FEE = '0.001';
 const RPC_URL = 'https://carrot.megaeth.com/rpc';
 
+// MegaETH Setup Guide Component
+function SetupGuide({ onClose }) {
+  return (
+    <div style={setupStyles.overlay}>
+      <div style={setupStyles.modal}>
+        <button onClick={onClose} style={setupStyles.closeBtn}>X</button>
+
+        <h1 style={setupStyles.title}>Get Started with MegaETH</h1>
+        <p style={setupStyles.subtitle}>The fastest EVM blockchain - 10ms blocks!</p>
+
+        <div style={setupStyles.section}>
+          <h2 style={setupStyles.sectionTitle}>Step 1: Get Testnet ETH</h2>
+          <p style={setupStyles.text}>Visit the official MegaETH Testnet portal to get free tokens:</p>
+          <a href="https://testnet.megaeth.com/" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>
+            https://testnet.megaeth.com/
+          </a>
+          <p style={setupStyles.note}>Connect your wallet and claim testnet ETH from the faucet.</p>
+        </div>
+
+        <div style={setupStyles.section}>
+          <h2 style={setupStyles.sectionTitle}>Step 2: Add MegaETH to Your Wallet</h2>
+          <p style={setupStyles.text}>Add MegaETH Testnet to MetaMask, Rabby, or OKX Wallet:</p>
+          <div style={setupStyles.config}>
+            <div><span style={setupStyles.label}>Network Name:</span> MegaETH Testnet</div>
+            <div><span style={setupStyles.label}>Chain ID:</span> 6343</div>
+            <div style={{marginTop: '10px', marginBottom: '5px'}}><span style={setupStyles.label}>RPC URLs (try these):</span></div>
+            <ul style={{paddingLeft: '20px', margin: '5px 0', color: '#4af', fontSize: '12px'}}>
+              <li>https://carrot.megaeth.com/rpc</li>
+              <li>https://rpc.megaeth.com</li>
+              <li>https://rpc.testnet.megaeth.com</li>
+              <li>https://json-rpc.testnet.megaeth.com</li>
+            </ul>
+            <div><span style={setupStyles.label}>Currency Symbol:</span> ETH</div>
+            <div><span style={setupStyles.label}>Block Explorer:</span></div>
+            <ul style={{paddingLeft: '20px', margin: '5px 0', fontSize: '12px'}}>
+              <li><a href="https://megaeth-testnet.explorer.caldera.xyz" target="_blank" rel="noopener noreferrer" style={setupStyles.configLink}>megaeth-testnet.explorer.caldera.xyz</a></li>
+              <li><a href="https://megaeth-testnet-v2.blockscout.com" target="_blank" rel="noopener noreferrer" style={setupStyles.configLink}>megaeth-testnet-v2.blockscout.com</a></li>
+            </ul>
+          </div>
+          <p style={setupStyles.note}>Supported wallets: MetaMask, Rabby, OKX Wallet, Zerion</p>
+        </div>
+
+        <div style={setupStyles.section}>
+          <h2 style={setupStyles.sectionTitle}>Step 3: Play Arena Survival!</h2>
+          <ol style={setupStyles.list}>
+            <li>Sign in with email or wallet (we create a wallet for you!)</li>
+            <li>Click "PAY & PLAY" - pay 0.001 ETH entry fee</li>
+            <li>Survive as long as possible!</li>
+            <li>Your score is automatically saved on-chain</li>
+            <li>Top scorer each day wins the prize pool!</li>
+          </ol>
+        </div>
+
+        <div style={setupStyles.section}>
+          <h2 style={setupStyles.sectionTitle}>Useful Links</h2>
+          <ul style={setupStyles.links}>
+            <li><a href="https://testnet.megaeth.com" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>MegaETH Testnet Portal & Faucet</a></li>
+            <li><a href="https://docs.megaeth.com" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>MegaETH Developer Docs</a></li>
+            <li><a href="https://megaeth-testnet.explorer.caldera.xyz" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>Block Explorer</a></li>
+            <li><a href="https://twitter.com/megaeth_labs" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>@megaeth_labs on Twitter</a></li>
+            <li><a href="https://megaeth.com" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>MegaETH Official Website</a></li>
+          </ul>
+        </div>
+
+        <button onClick={onClose} style={setupStyles.playBtn}>
+          LET'S PLAY!
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const setupStyles = {
+  overlay: {
+    position: 'fixed',
+    top: 0, left: 0, right: 0, bottom: 0,
+    background: 'rgba(0,0,0,0.95)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '20px',
+    overflowY: 'auto',
+  },
+  modal: {
+    background: 'linear-gradient(180deg, #1a1a2e 0%, #0a0a15 100%)',
+    border: '2px solid #f33',
+    borderRadius: '15px',
+    padding: '30px',
+    maxWidth: '600px',
+    width: '100%',
+    maxHeight: '90vh',
+    overflowY: 'auto',
+    position: 'relative',
+    fontFamily: 'monospace',
+    color: '#fff',
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: '15px',
+    right: '15px',
+    background: '#333',
+    border: 'none',
+    color: '#fff',
+    width: '30px',
+    height: '30px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '14px',
+  },
+  title: {
+    color: '#f33',
+    textAlign: 'center',
+    margin: '0 0 5px 0',
+    textShadow: '0 0 20px #f00',
+  },
+  subtitle: {
+    color: '#888',
+    textAlign: 'center',
+    marginBottom: '25px',
+  },
+  section: {
+    marginBottom: '25px',
+    padding: '15px',
+    background: 'rgba(0,0,0,0.3)',
+    borderRadius: '10px',
+    border: '1px solid #333',
+  },
+  sectionTitle: {
+    color: '#0f0',
+    margin: '0 0 10px 0',
+    fontSize: '16px',
+  },
+  text: {
+    color: '#ccc',
+    margin: '5px 0',
+    fontSize: '14px',
+  },
+  note: {
+    color: '#888',
+    fontSize: '12px',
+    marginTop: '10px',
+    fontStyle: 'italic',
+  },
+  link: {
+    color: '#4af',
+    wordBreak: 'break-all',
+  },
+  configLink: {
+    color: '#4af',
+    fontSize: '12px',
+  },
+  config: {
+    background: '#111',
+    padding: '15px',
+    borderRadius: '8px',
+    marginTop: '10px',
+    fontSize: '13px',
+    lineHeight: '1.8',
+  },
+  label: {
+    color: '#888',
+    marginRight: '10px',
+  },
+  list: {
+    color: '#ccc',
+    paddingLeft: '20px',
+    lineHeight: '1.8',
+    fontSize: '14px',
+  },
+  links: {
+    listStyle: 'none',
+    padding: 0,
+    lineHeight: '2',
+  },
+  playBtn: {
+    width: '100%',
+    padding: '15px',
+    fontSize: '18px',
+    background: 'linear-gradient(180deg, #f44, #a00)',
+    border: '2px solid #f66',
+    borderRadius: '8px',
+    color: '#fff',
+    cursor: 'pointer',
+    fontFamily: 'monospace',
+    fontWeight: 'bold',
+    marginTop: '10px',
+  },
+};
+
 function GameDashboard() {
   const { ready, authenticated, login, logout } = usePrivy();
   const { wallets } = useWallets();
@@ -30,6 +220,7 @@ function GameDashboard() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showSetup, setShowSetup] = useState(false);
 
   const activeWallet = wallets?.[0];
 
@@ -156,7 +347,7 @@ function GameDashboard() {
             // Encode name as bytes16
             const nameBytes = ethers.encodeBytes32String(name.slice(0, 16)).slice(0, 34);
 
-            // Submit score (NO PAYMENT - already paid in startGame)
+            // Submit score (NO PAYMENT - already paid)
             const tx = await contract.submitScore(score, wave, kills, nameBytes);
             console.log('Score TX sent:', tx.hash);
 
@@ -227,8 +418,10 @@ function GameDashboard() {
   if (!authenticated) {
     return (
       <div style={styles.container}>
+        {showSetup && <SetupGuide onClose={() => setShowSetup(false)} />}
+
         <h1 style={styles.title}>⚔ ARENA SURVIVAL ⚔</h1>
-        <p style={styles.subtitle}>Roguelike Survival on MegaETH</p>
+        <p style={styles.subtitle}>Roguelike Survival on MegaETH - The Fastest Blockchain!</p>
 
         <div style={styles.infoBox}>
           <h2 style={styles.prizeTitle}>🏆 DAILY PRIZE POOL 🏆</h2>
@@ -244,7 +437,11 @@ function GameDashboard() {
         <button onClick={login} style={styles.playButton}>
           🎮 SIGN IN TO PLAY
         </button>
-        <p style={styles.feeText}>0.001 ETH per game • Winner takes the pool every 24h</p>
+        <p style={styles.feeText}>0.001 ETH per game • Top scorer wins the pool daily!</p>
+
+        <button onClick={() => setShowSetup(true)} style={styles.setupButton}>
+          📖 HOW TO GET STARTED
+        </button>
 
         <Leaderboard entries={leaderboard} formatAddr={formatAddr} />
       </div>
@@ -469,6 +666,17 @@ const styles = {
   feeText: {
     color: '#666',
     fontSize: '12px',
+    marginBottom: '15px',
+  },
+  setupButton: {
+    background: 'transparent',
+    border: '1px solid #4af',
+    color: '#4af',
+    padding: '10px 25px',
+    fontSize: '14px',
+    fontFamily: 'monospace',
+    cursor: 'pointer',
+    borderRadius: '5px',
     marginBottom: '30px',
   },
   error: {
