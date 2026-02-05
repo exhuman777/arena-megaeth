@@ -26,8 +26,8 @@ const MegaETH = {
   // Current network (default testnet)
   network: 'testnet',
 
-  // V3 Contract address (deploy and update this)
-  leaderboardAddress: '0x01acFE50012710202B916886f86100c416578BA7', // TODO: Update after V3 deploy
+  // V3 Contract address - deployed to MegaETH testnet
+  leaderboardAddress: '0x9D7eb73DE7d8A309D2e10148584F623263058585',
 
   // Entry fee - 0.001 ETH per game
   ENTRY_FEE: '0.001',
