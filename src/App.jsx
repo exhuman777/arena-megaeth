@@ -26,78 +26,227 @@ function SetupGuide({ onClose }) {
   return (
     <div style={setupStyles.overlay}>
       <div style={setupStyles.modal}>
-        <button onClick={onClose} style={setupStyles.closeBtn}>X</button>
+        <button onClick={onClose} style={setupStyles.closeBtn}>×</button>
 
-        <h1 style={setupStyles.title}>Get Started with MegaETH</h1>
-        <p style={setupStyles.subtitle}>The fastest EVM blockchain - 10ms blocks!</p>
+        <h1 style={setupStyles.title}>MegaETH Setup</h1>
+        <p style={setupStyles.subtitle}>10ms blocks. The fastest EVM chain.</p>
 
         <div style={setupStyles.section}>
-          <h2 style={setupStyles.sectionTitle}>Step 1: Get Testnet ETH</h2>
-          <p style={setupStyles.text}>Visit the official MegaETH Testnet portal to get free tokens:</p>
+          <h2 style={setupStyles.sectionTitle}>1. Get Testnet ETH</h2>
+          <p style={setupStyles.text}>Claim free tokens from the official faucet:</p>
           <a href="https://testnet.megaeth.com/" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>
-            https://testnet.megaeth.com/
+            testnet.megaeth.com
           </a>
-          <p style={setupStyles.note}>Connect your wallet and claim testnet ETH from the faucet.</p>
         </div>
 
         <div style={setupStyles.section}>
-          <h2 style={setupStyles.sectionTitle}>Step 2: Add MegaETH to Your Wallet</h2>
-          <p style={setupStyles.text}>Add MegaETH Testnet to MetaMask, Rabby, or OKX Wallet:</p>
+          <h2 style={setupStyles.sectionTitle}>2. Add Network</h2>
           <div style={setupStyles.config}>
-            <div><span style={setupStyles.label}>Network Name:</span> MegaETH Testnet</div>
-            <div><span style={setupStyles.label}>Chain ID:</span> 6343</div>
-            <div style={{marginTop: '10px', marginBottom: '5px'}}><span style={setupStyles.label}>RPC URLs (try these):</span></div>
-            <ul style={{paddingLeft: '20px', margin: '5px 0', color: '#4af', fontSize: '12px'}}>
-              <li>https://carrot.megaeth.com/rpc</li>
-              <li>https://rpc.megaeth.com</li>
-              <li>https://rpc.testnet.megaeth.com</li>
-              <li>https://json-rpc.testnet.megaeth.com</li>
-            </ul>
-            <div><span style={setupStyles.label}>Currency Symbol:</span> ETH</div>
-            <div><span style={setupStyles.label}>Block Explorer:</span></div>
-            <ul style={{paddingLeft: '20px', margin: '5px 0', fontSize: '12px'}}>
-              <li><a href="https://megaeth-testnet.explorer.caldera.xyz" target="_blank" rel="noopener noreferrer" style={setupStyles.configLink}>megaeth-testnet.explorer.caldera.xyz</a></li>
-              <li><a href="https://megaeth-testnet-v2.blockscout.com" target="_blank" rel="noopener noreferrer" style={setupStyles.configLink}>megaeth-testnet-v2.blockscout.com</a></li>
-            </ul>
+            <div style={setupStyles.configRow}><span style={setupStyles.label}>Network</span><span style={setupStyles.value}>MegaETH Testnet</span></div>
+            <div style={setupStyles.configRow}><span style={setupStyles.label}>Chain ID</span><span style={setupStyles.value}>6343</span></div>
+            <div style={setupStyles.configRow}><span style={setupStyles.label}>Symbol</span><span style={setupStyles.value}>ETH</span></div>
+            <div style={{...setupStyles.configRow, flexDirection: 'column', alignItems: 'flex-start', gap: '6px'}}>
+              <span style={setupStyles.label}>RPC URLs</span>
+              <code style={setupStyles.code}>https://carrot.megaeth.com/rpc</code>
+              <code style={setupStyles.code}>https://rpc.megaeth.com</code>
+              <code style={setupStyles.code}>https://rpc.testnet.megaeth.com</code>
+            </div>
           </div>
-          <p style={setupStyles.note}>Supported wallets: MetaMask, Rabby, OKX Wallet, Zerion</p>
         </div>
 
         <div style={setupStyles.section}>
-          <h2 style={setupStyles.sectionTitle}>Step 3: Play Arena Survival!</h2>
-          <ol style={setupStyles.list}>
-            <li>Sign in with email or wallet (we create a wallet for you!)</li>
-            <li>Click "PAY & PLAY" - pay 0.001 ETH entry fee</li>
-            <li>Survive as long as possible!</li>
-            <li>Your score is automatically saved on-chain</li>
-            <li>Top scorer each day wins the prize pool!</li>
-          </ol>
-        </div>
-
-        <div style={setupStyles.section}>
-          <h2 style={setupStyles.sectionTitle}>Useful Links</h2>
-          <ul style={setupStyles.links}>
-            <li><a href="https://testnet.megaeth.com" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>MegaETH Testnet Portal & Faucet</a></li>
-            <li><a href="https://docs.megaeth.com" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>MegaETH Developer Docs</a></li>
-            <li><a href="https://megaeth-testnet.explorer.caldera.xyz" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>Block Explorer</a></li>
-            <li><a href="https://twitter.com/megaeth_labs" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>@megaeth_labs on Twitter</a></li>
-            <li><a href="https://megaeth.com" target="_blank" rel="noopener noreferrer" style={setupStyles.link}>MegaETH Official Website</a></li>
+          <h2 style={setupStyles.sectionTitle}>3. Play</h2>
+          <ul style={setupStyles.list}>
+            <li>Sign in with email or wallet</li>
+            <li>Pay 0.001 ETH entry fee</li>
+            <li>Survive. Top score wins the daily pool.</li>
           </ul>
         </div>
 
+        <div style={setupStyles.links}>
+          <a href="https://docs.megaeth.com" target="_blank" rel="noopener noreferrer" style={setupStyles.linkSmall}>Docs</a>
+          <a href="https://megaeth-testnet.explorer.caldera.xyz" target="_blank" rel="noopener noreferrer" style={setupStyles.linkSmall}>Explorer</a>
+          <a href="https://twitter.com/megaeth_labs" target="_blank" rel="noopener noreferrer" style={setupStyles.linkSmall}>Twitter</a>
+        </div>
+
         <button onClick={onClose} style={setupStyles.playBtn}>
-          LET'S PLAY!
+          GOT IT
         </button>
       </div>
     </div>
   );
 }
 
+// How to Play Guide Component
+function HowToPlay({ onClose }) {
+  return (
+    <div style={setupStyles.overlay}>
+      <div style={setupStyles.modal}>
+        <button onClick={onClose} style={setupStyles.closeBtn}>×</button>
+
+        <h1 style={setupStyles.title}>How to Play</h1>
+        <p style={setupStyles.subtitle}>Survive waves of monsters. Get the highest score.</p>
+
+        <div style={setupStyles.section}>
+          <h2 style={setupStyles.sectionTitle}>Movement</h2>
+          <div style={howToPlayStyles.controls}>
+            <div style={howToPlayStyles.controlGroup}>
+              <div style={howToPlayStyles.keys}>
+                <span style={howToPlayStyles.key}>W</span>
+                <div style={howToPlayStyles.keyRow}>
+                  <span style={howToPlayStyles.key}>A</span>
+                  <span style={howToPlayStyles.key}>S</span>
+                  <span style={howToPlayStyles.key}>D</span>
+                </div>
+              </div>
+              <span style={howToPlayStyles.or}>or</span>
+              <div style={howToPlayStyles.keys}>
+                <span style={howToPlayStyles.key}>↑</span>
+                <div style={howToPlayStyles.keyRow}>
+                  <span style={howToPlayStyles.key}>←</span>
+                  <span style={howToPlayStyles.key}>↓</span>
+                  <span style={howToPlayStyles.key}>→</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style={howToPlayStyles.hint}>Move into enemies to attack them</p>
+        </div>
+
+        <div style={setupStyles.section}>
+          <h2 style={setupStyles.sectionTitle}>Actions</h2>
+          <div style={howToPlayStyles.actionList}>
+            <div style={howToPlayStyles.action}>
+              <span style={howToPlayStyles.key}>Z</span>
+              <span style={howToPlayStyles.actionText}>Wait / Rest</span>
+            </div>
+            <div style={howToPlayStyles.action}>
+              <span style={howToPlayStyles.key}>E</span>
+              <span style={howToPlayStyles.actionText}>Pick up item (auto on walk)</span>
+            </div>
+            <div style={howToPlayStyles.action}>
+              <span style={howToPlayStyles.keySmall}>1-9</span>
+              <span style={howToPlayStyles.actionText}>Use skills</span>
+            </div>
+          </div>
+        </div>
+
+        <div style={setupStyles.section}>
+          <h2 style={setupStyles.sectionTitle}>Goal</h2>
+          <ul style={howToPlayStyles.goalList}>
+            <li>Kill monsters to earn points</li>
+            <li>Survive as many waves as possible</li>
+            <li>Collect loot to get stronger</li>
+            <li>Top daily score wins the prize pool</li>
+          </ul>
+        </div>
+
+        <div style={howToPlayStyles.tip}>
+          Tip: This is turn-based. Take your time to plan each move.
+        </div>
+
+        <button onClick={onClose} style={setupStyles.playBtn}>
+          READY
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const howToPlayStyles = {
+  controls: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: '12px',
+  },
+  controlGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '20px',
+  },
+  keys: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '4px',
+  },
+  keyRow: {
+    display: 'flex',
+    gap: '4px',
+  },
+  key: {
+    background: '#1a1a1a',
+    border: '1px solid #333',
+    borderRadius: '6px',
+    padding: '8px 12px',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#fff',
+    minWidth: '40px',
+    textAlign: 'center',
+  },
+  keySmall: {
+    background: '#1a1a1a',
+    border: '1px solid #333',
+    borderRadius: '6px',
+    padding: '8px 12px',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#fff',
+    minWidth: '40px',
+    textAlign: 'center',
+  },
+  or: {
+    color: '#444',
+    fontSize: '12px',
+  },
+  hint: {
+    color: '#666',
+    fontSize: '12px',
+    textAlign: 'center',
+    marginTop: '12px',
+    marginBottom: 0,
+  },
+  actionList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    marginTop: '8px',
+  },
+  action: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  actionText: {
+    color: '#888',
+    fontSize: '13px',
+  },
+  goalList: {
+    color: '#888',
+    paddingLeft: '16px',
+    margin: 0,
+    lineHeight: '1.8',
+    fontSize: '13px',
+  },
+  tip: {
+    background: '#111',
+    border: '1px solid #1a1a1a',
+    borderRadius: '8px',
+    padding: '12px 16px',
+    fontSize: '12px',
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: '20px',
+  },
+};
+
 const setupStyles = {
   overlay: {
     position: 'fixed',
     top: 0, left: 0, right: 0, bottom: 0,
-    background: 'rgba(0,0,0,0.95)',
+    background: 'rgba(0,0,0,0.9)',
+    backdropFilter: 'blur(4px)',
     zIndex: 1000,
     display: 'flex',
     alignItems: 'center',
@@ -106,108 +255,130 @@ const setupStyles = {
     overflowY: 'auto',
   },
   modal: {
-    background: 'linear-gradient(180deg, #1a1a2e 0%, #0a0a15 100%)',
-    border: '2px solid #f33',
-    borderRadius: '15px',
-    padding: '30px',
-    maxWidth: '600px',
+    background: '#0a0a0a',
+    border: '1px solid #222',
+    borderRadius: '12px',
+    padding: '32px',
+    maxWidth: '440px',
     width: '100%',
     maxHeight: '90vh',
     overflowY: 'auto',
     position: 'relative',
-    fontFamily: 'monospace',
+    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
     color: '#fff',
   },
   closeBtn: {
     position: 'absolute',
-    top: '15px',
-    right: '15px',
-    background: '#333',
-    border: 'none',
-    color: '#fff',
-    width: '30px',
-    height: '30px',
-    borderRadius: '5px',
+    top: '16px',
+    right: '16px',
+    background: 'transparent',
+    border: '1px solid #333',
+    color: '#666',
+    width: '32px',
+    height: '32px',
+    borderRadius: '6px',
     cursor: 'pointer',
-    fontSize: '14px',
+    fontSize: '18px',
+    transition: 'all 0.2s',
   },
   title: {
-    color: '#f33',
+    color: '#fff',
     textAlign: 'center',
-    margin: '0 0 5px 0',
-    textShadow: '0 0 20px #f00',
+    margin: '0 0 4px 0',
+    fontSize: '20px',
+    fontWeight: '600',
+    letterSpacing: '-0.5px',
   },
   subtitle: {
-    color: '#888',
+    color: '#666',
     textAlign: 'center',
-    marginBottom: '25px',
+    marginBottom: '24px',
+    fontSize: '13px',
   },
   section: {
-    marginBottom: '25px',
-    padding: '15px',
-    background: 'rgba(0,0,0,0.3)',
-    borderRadius: '10px',
-    border: '1px solid #333',
+    marginBottom: '20px',
+    padding: '16px',
+    background: '#111',
+    borderRadius: '8px',
+    border: '1px solid #1a1a1a',
   },
   sectionTitle: {
-    color: '#0f0',
-    margin: '0 0 10px 0',
-    fontSize: '16px',
+    color: '#fff',
+    margin: '0 0 8px 0',
+    fontSize: '14px',
+    fontWeight: '500',
   },
   text: {
-    color: '#ccc',
-    margin: '5px 0',
-    fontSize: '14px',
-  },
-  note: {
     color: '#888',
-    fontSize: '12px',
-    marginTop: '10px',
-    fontStyle: 'italic',
+    margin: '0 0 8px 0',
+    fontSize: '13px',
   },
   link: {
-    color: '#4af',
-    wordBreak: 'break-all',
-  },
-  configLink: {
-    color: '#4af',
-    fontSize: '12px',
+    color: '#fff',
+    fontSize: '13px',
+    textDecoration: 'underline',
+    textUnderlineOffset: '2px',
   },
   config: {
-    background: '#111',
-    padding: '15px',
-    borderRadius: '8px',
-    marginTop: '10px',
-    fontSize: '13px',
-    lineHeight: '1.8',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  configRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   label: {
+    color: '#666',
+    fontSize: '12px',
+  },
+  value: {
+    color: '#fff',
+    fontSize: '13px',
+  },
+  code: {
     color: '#888',
-    marginRight: '10px',
+    fontSize: '11px',
+    background: '#0a0a0a',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontFamily: 'inherit',
+    display: 'block',
+    width: '100%',
   },
   list: {
-    color: '#ccc',
-    paddingLeft: '20px',
+    color: '#888',
+    paddingLeft: '16px',
+    margin: 0,
     lineHeight: '1.8',
-    fontSize: '14px',
+    fontSize: '13px',
   },
   links: {
-    listStyle: 'none',
-    padding: 0,
-    lineHeight: '2',
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '16px',
+    marginBottom: '20px',
+  },
+  linkSmall: {
+    color: '#666',
+    fontSize: '12px',
+    textDecoration: 'none',
+    borderBottom: '1px solid #333',
+    paddingBottom: '2px',
   },
   playBtn: {
     width: '100%',
-    padding: '15px',
-    fontSize: '18px',
-    background: 'linear-gradient(180deg, #f44, #a00)',
-    border: '2px solid #f66',
+    padding: '14px',
+    fontSize: '13px',
+    background: '#fff',
+    border: 'none',
     borderRadius: '8px',
-    color: '#fff',
+    color: '#000',
     cursor: 'pointer',
-    fontFamily: 'monospace',
-    fontWeight: 'bold',
-    marginTop: '10px',
+    fontFamily: 'inherit',
+    fontWeight: '600',
+    letterSpacing: '0.5px',
   },
 };
 
@@ -221,6 +392,7 @@ function GameDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showSetup, setShowSetup] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
 
   const activeWallet = wallets?.[0];
 
@@ -419,29 +591,37 @@ function GameDashboard() {
     return (
       <div style={styles.container}>
         {showSetup && <SetupGuide onClose={() => setShowSetup(false)} />}
+        {showHowToPlay && <HowToPlay onClose={() => setShowHowToPlay(false)} />}
 
-        <h1 style={styles.title}>⚔ ARENA SURVIVAL ⚔</h1>
-        <p style={styles.subtitle}>Roguelike Survival on MegaETH - The Fastest Blockchain!</p>
+        <div style={styles.header}>
+          <h1 style={styles.title}>ARENA</h1>
+          <span style={styles.badge}>MegaETH</span>
+        </div>
+        <p style={styles.subtitle}>Roguelike survival. On-chain scores. Daily prizes.</p>
 
-        <div style={styles.infoBox}>
-          <h2 style={styles.prizeTitle}>🏆 DAILY PRIZE POOL 🏆</h2>
+        <div style={styles.prizeCard}>
+          <div style={styles.prizeLabel}>PRIZE POOL</div>
           <div style={styles.prizeAmount}>{epoch?.prizePool || '0'} ETH</div>
-          <div style={styles.prizeInfo}>
-            Time left: {epoch ? formatTime(epoch.timeRemaining) : '--'}
-          </div>
-          <div style={styles.prizeInfo}>
-            Current Leader: {epoch ? formatAddr(epoch.currentLeader) : '--'} ({epoch?.topScore || 0} pts)
+          <div style={styles.prizeMeta}>
+            <span>{epoch ? formatTime(epoch.timeRemaining) : '--'} left</span>
+            <span style={styles.separator}>·</span>
+            <span>Leader: {epoch?.topScore || 0} pts</span>
           </div>
         </div>
 
-        <button onClick={login} style={styles.playButton}>
-          🎮 SIGN IN TO PLAY
+        <button onClick={login} style={styles.primaryBtn}>
+          SIGN IN TO PLAY
         </button>
-        <p style={styles.feeText}>0.001 ETH per game • Top scorer wins the pool daily!</p>
+        <p style={styles.feeText}>0.001 ETH entry · Winner takes pool</p>
 
-        <button onClick={() => setShowSetup(true)} style={styles.setupButton}>
-          📖 HOW TO GET STARTED
-        </button>
+        <div style={styles.btnRow}>
+          <button onClick={() => setShowHowToPlay(true)} style={styles.secondaryBtn}>
+            How to Play
+          </button>
+          <button onClick={() => setShowSetup(true)} style={styles.secondaryBtn}>
+            Setup Guide
+          </button>
+        </div>
 
         <Leaderboard entries={leaderboard} formatAddr={formatAddr} />
       </div>
@@ -452,10 +632,14 @@ function GameDashboard() {
     return (
       <div style={styles.gameContainer}>
         <div style={styles.gameHeader}>
-          <span style={{color: '#0f0'}}>● {formatAddr(activeWallet?.address)}</span>
-          <span style={{color: '#0f0'}}>✓ PAID {ENTRY_FEE} ETH</span>
-          <span style={{color: '#0ff'}}>Pool: {epoch?.prizePool || '0'} ETH</span>
-          <button onClick={() => { setIsPlaying(false); window.location.reload(); }} style={styles.backButton}>← Back</button>
+          <div style={styles.gameHeaderLeft}>
+            <span style={styles.walletDot}>{formatAddr(activeWallet?.address)}</span>
+            <span style={styles.paidBadge}>PAID</span>
+          </div>
+          <div style={styles.gameHeaderRight}>
+            <span style={styles.poolInfo}>{epoch?.prizePool || '0'} ETH pool</span>
+            <button onClick={() => { setIsPlaying(false); window.location.reload(); }} style={styles.exitBtn}>Exit</button>
+          </div>
         </div>
         <iframe
           src="/arena-game.html?autostart=1"
@@ -468,41 +652,56 @@ function GameDashboard() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>⚔ ARENA SURVIVAL ⚔</h1>
+      {showHowToPlay && <HowToPlay onClose={() => setShowHowToPlay(false)} />}
 
-      <div style={styles.walletInfo}>
-        <span style={{color: '#0f0'}}>● {formatAddr(activeWallet?.address)}</span>
-        <button onClick={logout} style={styles.logoutButton}>Logout</button>
+      <div style={styles.header}>
+        <h1 style={styles.title}>ARENA</h1>
+        <span style={styles.badge}>MegaETH</span>
       </div>
 
-      <div style={styles.infoBox}>
-        <h2 style={styles.prizeTitle}>🏆 DAILY PRIZE POOL 🏆</h2>
+      <div style={styles.walletBar}>
+        <span style={styles.walletDot}>{formatAddr(activeWallet?.address)}</span>
+        <button onClick={logout} style={styles.logoutBtn}>Sign out</button>
+      </div>
+
+      <div style={styles.prizeCard}>
+        <div style={styles.prizeLabel}>PRIZE POOL</div>
         <div style={styles.prizeAmount}>{epoch?.prizePool || '0'} ETH</div>
-        <div style={styles.prizeInfo}>
-          Epoch #{epoch?.id || 1} • Time left: {epoch ? formatTime(epoch.timeRemaining) : '--'}
-        </div>
-        <div style={styles.prizeInfo}>
-          Leader: {epoch ? formatAddr(epoch.currentLeader) : '--'} ({epoch?.topScore || 0} pts)
+        <div style={styles.prizeMeta}>
+          <span>Epoch {epoch?.id || 1}</span>
+          <span style={styles.separator}>·</span>
+          <span>{epoch ? formatTime(epoch.timeRemaining) : '--'} left</span>
         </div>
       </div>
 
       {playerStats && (
-        <div style={styles.statsBox}>
-          <div>Games: {playerStats.gamesPlayed}</div>
-          <div>Earnings: {playerStats.totalEarnings} ETH</div>
-          <div>Best Rank: #{playerStats.bestRank || '--'}</div>
+        <div style={styles.statsRow}>
+          <div style={styles.stat}>
+            <span style={styles.statValue}>{playerStats.gamesPlayed}</span>
+            <span style={styles.statLabel}>games</span>
+          </div>
+          <div style={styles.stat}>
+            <span style={styles.statValue}>{playerStats.totalEarnings}</span>
+            <span style={styles.statLabel}>ETH won</span>
+          </div>
+          <div style={styles.stat}>
+            <span style={styles.statValue}>#{playerStats.bestRank || '-'}</span>
+            <span style={styles.statLabel}>best</span>
+          </div>
         </div>
       )}
 
-      <button onClick={startGame} disabled={loading} style={styles.playButton}>
-        {loading ? '⏳ PAYING ENTRY FEE...' : '🎮 PAY & PLAY (0.001 ETH)'}
+      <button onClick={startGame} disabled={loading} style={styles.primaryBtn}>
+        {loading ? 'PROCESSING...' : 'PLAY · 0.001 ETH'}
       </button>
 
       {error && <div style={styles.error}>{error}</div>}
 
-      <p style={styles.feeText}>
-        95% goes to prize pool • 5% house fee • Top scorer wins daily!
-      </p>
+      <p style={styles.feeText}>95% to pool · 5% fee · Top score wins daily</p>
+
+      <button onClick={() => setShowHowToPlay(true)} style={styles.linkBtn}>
+        How to Play
+      </button>
 
       <Leaderboard entries={leaderboard} formatAddr={formatAddr} currentPlayer={activeWallet?.address} />
     </div>
@@ -514,29 +713,26 @@ function Leaderboard({ entries, formatAddr, currentPlayer }) {
 
   return (
     <div style={styles.leaderboard}>
-      <h3 style={styles.lbTitle}>📊 LEADERBOARD</h3>
-      <table style={styles.lbTable}>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Player</th>
-            <th>Score</th>
-            <th>Wave</th>
-            <th>Kills</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((e, i) => (
-            <tr key={i} style={e.player === currentPlayer ? styles.lbHighlight : {}}>
-              <td>{i + 1}</td>
-              <td>{e.name || formatAddr(e.player)}</td>
-              <td style={{color: '#ff0'}}>{e.score}</td>
-              <td>{e.wave}</td>
-              <td>{e.kills}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={styles.lbHeader}>
+        <h3 style={styles.lbTitle}>LEADERBOARD</h3>
+        <span style={styles.lbCount}>{entries.length} players</span>
+      </div>
+      <div style={styles.lbList}>
+        {entries.map((e, i) => (
+          <div key={i} style={{
+            ...styles.lbRow,
+            ...(e.player === currentPlayer ? styles.lbHighlight : {}),
+            ...(i === 0 ? styles.lbFirst : {})
+          }}>
+            <div style={styles.lbRank}>{i + 1}</div>
+            <div style={styles.lbPlayer}>
+              <span style={styles.lbName}>{e.name || formatAddr(e.player)}</span>
+              <span style={styles.lbStats}>W{e.wave} · {e.kills} kills</span>
+            </div>
+            <div style={styles.lbScore}>{e.score}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -555,24 +751,210 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     minHeight: '100vh',
-    padding: '20px',
-    fontFamily: 'monospace',
+    padding: '32px 20px',
+    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
     color: '#fff',
+    background: '#000',
   },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '8px',
+  },
+  title: {
+    color: '#fff',
+    fontSize: '32px',
+    fontWeight: '700',
+    margin: 0,
+    letterSpacing: '-1px',
+  },
+  badge: {
+    background: '#111',
+    border: '1px solid #333',
+    borderRadius: '4px',
+    padding: '4px 8px',
+    fontSize: '11px',
+    color: '#666',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  subtitle: {
+    color: '#666',
+    marginBottom: '32px',
+    fontSize: '14px',
+  },
+  prizeCard: {
+    background: '#0a0a0a',
+    border: '1px solid #1a1a1a',
+    borderRadius: '12px',
+    padding: '24px 48px',
+    textAlign: 'center',
+    marginBottom: '24px',
+  },
+  prizeLabel: {
+    color: '#444',
+    fontSize: '11px',
+    letterSpacing: '1px',
+    marginBottom: '8px',
+  },
+  prizeAmount: {
+    color: '#fff',
+    fontSize: '40px',
+    fontWeight: '700',
+    letterSpacing: '-2px',
+  },
+  prizeMeta: {
+    color: '#555',
+    fontSize: '12px',
+    marginTop: '8px',
+  },
+  separator: {
+    margin: '0 8px',
+  },
+  walletBar: {
+    display: 'flex',
+    gap: '12px',
+    alignItems: 'center',
+    marginBottom: '24px',
+    fontSize: '13px',
+  },
+  walletDot: {
+    color: '#888',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+  },
+  statsRow: {
+    display: 'flex',
+    gap: '32px',
+    marginBottom: '24px',
+  },
+  stat: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '2px',
+  },
+  statValue: {
+    color: '#fff',
+    fontSize: '18px',
+    fontWeight: '600',
+  },
+  statLabel: {
+    color: '#555',
+    fontSize: '11px',
+  },
+  primaryBtn: {
+    background: '#fff',
+    border: 'none',
+    color: '#000',
+    padding: '16px 48px',
+    fontSize: '14px',
+    fontFamily: 'inherit',
+    fontWeight: '600',
+    cursor: 'pointer',
+    borderRadius: '8px',
+    marginBottom: '12px',
+    letterSpacing: '0.5px',
+    transition: 'opacity 0.2s',
+  },
+  secondaryBtn: {
+    background: 'transparent',
+    border: '1px solid #333',
+    color: '#888',
+    padding: '12px 24px',
+    fontSize: '13px',
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+    borderRadius: '6px',
+    transition: 'all 0.2s',
+  },
+  btnRow: {
+    display: 'flex',
+    gap: '12px',
+    marginBottom: '32px',
+  },
+  linkBtn: {
+    background: 'transparent',
+    border: 'none',
+    color: '#555',
+    padding: '8px 16px',
+    fontSize: '12px',
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    textUnderlineOffset: '2px',
+  },
+  logoutBtn: {
+    background: 'transparent',
+    border: '1px solid #222',
+    color: '#555',
+    padding: '6px 12px',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    fontSize: '12px',
+    borderRadius: '4px',
+  },
+  feeText: {
+    color: '#444',
+    fontSize: '12px',
+    marginBottom: '8px',
+  },
+  error: {
+    color: '#e55',
+    fontSize: '13px',
+    marginBottom: '12px',
+  },
+  // Game playing state
   gameContainer: {
     width: '100%',
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
+    background: '#000',
   },
   gameHeader: {
     display: 'flex',
-    gap: '20px',
-    padding: '10px',
-    fontFamily: 'monospace',
-    fontSize: '12px',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    padding: '12px 16px',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '12px',
+    background: '#0a0a0a',
+    borderBottom: '1px solid #1a1a1a',
+  },
+  gameHeaderLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  gameHeaderRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+  },
+  paidBadge: {
+    background: '#1a2f1a',
+    color: '#4a4',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontSize: '10px',
+    fontWeight: '600',
+    letterSpacing: '0.5px',
+  },
+  poolInfo: {
+    color: '#666',
+  },
+  exitBtn: {
     background: '#111',
+    border: '1px solid #222',
+    color: '#888',
+    padding: '6px 16px',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    fontSize: '12px',
+    borderRadius: '4px',
   },
   gameIframe: {
     flex: 1,
@@ -580,136 +962,94 @@ const styles = {
     border: 'none',
   },
   loading: {
-    color: '#888',
-    fontFamily: 'monospace',
-    padding: '50px',
-  },
-  title: {
-    color: '#f33',
-    textShadow: '0 0 10px #f00, 2px 2px #000',
-    fontSize: '28px',
-    margin: '10px 0',
-    letterSpacing: '3px',
-  },
-  subtitle: {
-    color: '#888',
-    marginBottom: '20px',
-  },
-  walletInfo: {
-    display: 'flex',
-    gap: '15px',
-    alignItems: 'center',
-    marginBottom: '20px',
-    fontSize: '14px',
-  },
-  infoBox: {
-    background: 'rgba(255,215,0,0.1)',
-    border: '2px solid #ffd700',
-    borderRadius: '10px',
-    padding: '20px 40px',
-    textAlign: 'center',
-    marginBottom: '20px',
-  },
-  prizeTitle: {
-    color: '#ffd700',
-    margin: '0 0 10px 0',
-    fontSize: '18px',
-  },
-  prizeAmount: {
-    color: '#0f0',
-    fontSize: '36px',
-    fontWeight: 'bold',
-    textShadow: '0 0 10px #0f0',
-  },
-  prizeInfo: {
-    color: '#aaa',
-    fontSize: '14px',
-    marginTop: '5px',
-  },
-  statsBox: {
-    display: 'flex',
-    gap: '30px',
-    marginBottom: '20px',
-    fontSize: '14px',
-    color: '#888',
-  },
-  playButton: {
-    background: 'linear-gradient(180deg, #f44 0%, #c00 100%)',
-    border: 'none',
-    color: '#fff',
-    padding: '15px 40px',
-    fontSize: '18px',
-    fontFamily: 'monospace',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    borderRadius: '5px',
-    marginBottom: '10px',
-    boxShadow: '0 4px 15px rgba(255,0,0,0.4)',
-  },
-  logoutButton: {
-    background: '#333',
-    border: '1px solid #555',
-    color: '#888',
-    padding: '5px 10px',
-    cursor: 'pointer',
-    fontFamily: 'monospace',
-    fontSize: '12px',
-  },
-  backButton: {
-    background: '#333',
-    border: '1px solid #555',
-    color: '#fff',
-    padding: '5px 15px',
-    cursor: 'pointer',
-    fontFamily: 'monospace',
-  },
-  feeText: {
     color: '#666',
-    fontSize: '12px',
-    marginBottom: '15px',
+    fontFamily: "'JetBrains Mono', monospace",
+    padding: '50px',
+    background: '#000',
+    minHeight: '100vh',
   },
-  setupButton: {
-    background: 'transparent',
-    border: '1px solid #4af',
-    color: '#4af',
-    padding: '10px 25px',
-    fontSize: '14px',
-    fontFamily: 'monospace',
-    cursor: 'pointer',
-    borderRadius: '5px',
-    marginBottom: '30px',
-  },
-  error: {
-    color: '#f66',
-    marginBottom: '10px',
-  },
+  // Leaderboard
   leaderboard: {
     width: '100%',
-    maxWidth: '500px',
-    marginTop: '20px',
+    maxWidth: '400px',
+    marginTop: '24px',
+  },
+  lbHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '12px',
   },
   lbTitle: {
     color: '#fff',
-    textAlign: 'center',
-    marginBottom: '10px',
+    margin: 0,
+    fontSize: '14px',
+    fontWeight: '600',
   },
-  lbTable: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    fontSize: '13px',
+  lbCount: {
+    color: '#444',
+    fontSize: '12px',
+  },
+  lbList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  },
+  lbRow: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '12px',
+    background: '#0a0a0a',
+    borderRadius: '6px',
+    gap: '12px',
+  },
+  lbFirst: {
+    background: '#111',
+    border: '1px solid #222',
   },
   lbHighlight: {
-    background: 'rgba(0,255,0,0.2)',
+    background: '#0f1a0f',
+    border: '1px solid #1a2f1a',
+  },
+  lbRank: {
+    color: '#555',
+    fontSize: '14px',
+    fontWeight: '600',
+    width: '24px',
+    textAlign: 'center',
+  },
+  lbPlayer: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  },
+  lbName: {
+    color: '#fff',
+    fontSize: '13px',
+  },
+  lbStats: {
+    color: '#444',
+    fontSize: '11px',
+  },
+  lbScore: {
+    color: '#fff',
+    fontSize: '16px',
+    fontWeight: '600',
   },
 };
 
-// Add table styles
-const tableStyles = document.createElement('style');
-tableStyles.textContent = `
-  table th, table td { padding: 8px; text-align: left; border-bottom: 1px solid #333; }
-  table th { color: #888; }
-  table td { color: #fff; }
+// Add global styles
+const globalStyles = document.createElement('style');
+globalStyles.textContent = `
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #000; }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  a { transition: opacity 0.2s; }
+  a:hover { opacity: 0.7; }
 `;
-document.head.appendChild(tableStyles);
+document.head.appendChild(globalStyles);
 
 export default App;

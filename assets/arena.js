@@ -674,10 +674,11 @@ var ArenaGame = {
   },
 
   // Performance limits
-  MAX_PARTICLES: 80, // Reduced for better performance
-  MAX_PROJECTILES: 20,
-  MAX_HAZARDS: 30,
-  MAX_FLOATING_TEXTS: 15,
+  MAX_PARTICLES: 50, // Reduced further for stability
+  MAX_PROJECTILES: 15,
+  MAX_HAZARDS: 20,
+  MAX_FLOATING_TEXTS: 10,
+  MAX_ITEMS: 15, // Limit dropped items
 
   update: function() {
     this.handleInput();
@@ -932,16 +933,19 @@ var ArenaGame = {
       this.keys['KeyJ'] = false;
     }
 
-    // Pickup: V (arrows) or K (WASD)
-    if (this.keys['KeyV'] || this.keys['KeyK']) {
+    // Pickup: V/K/E/Enter/Backslash - multiple keys for easier pickup
+    if (this.keys['KeyV'] || this.keys['KeyK'] || this.keys['KeyE'] || this.keys['Enter'] || this.keys['Backslash']) {
       this.pickupItem();
       this.keys['KeyV'] = false;
       this.keys['KeyK'] = false;
+      this.keys['KeyE'] = false;
+      this.keys['Enter'] = false;
+      this.keys['Backslash'] = false;
     }
 
-    // Auto-pickup potions when walking over them
+    // Auto-pickup ALL items when walking over them
     let itemHere = this.items.find(i => i.x === this.player.x && i.y === this.player.y);
-    if (itemHere && itemHere.type === 'potion') {
+    if (itemHere) {
       this.pickupItem();
     }
 
@@ -1799,8 +1803,13 @@ var ArenaGame = {
   },
 
   spawnMonster: function() {
-    // Limit entities to prevent crashes
-    if (this.entities.length >= 25) return;
+    // Limit entities for stability at higher waves
+    if (this.entities.length >= 18) return;
+
+    // Clean up old items to prevent memory issues
+    if (this.items.length > this.MAX_ITEMS) {
+      this.items = this.items.slice(-this.MAX_ITEMS);
+    }
 
     // Spawn on edge
     let edge = Math.floor(Math.random() * 4);
@@ -1911,7 +1920,7 @@ var ArenaGame = {
         break;
 
       case 'summon':
-        if (this.entities.length < 15 && Math.random() < 0.03) {
+        if (this.entities.length < 12 && Math.random() < 0.02) {
           this.summonMinion(e, 'skeleton');
           e.abilityCooldown = 5000;
           this.addCombatLog(`☠ Necromancer summons a skeleton!`, '#808');
@@ -1947,7 +1956,7 @@ var ArenaGame = {
         break;
 
       case 'spawnlings':
-        if (this.entities.length < 20 && Math.random() < 0.02) {
+        if (this.entities.length < 14 && Math.random() < 0.015) {
           for (let i = 0; i < 3; i++) {
             this.summonMinion(e, 'spider');
           }

@@ -1,187 +1,122 @@
-# Arena Survival - MegaETH Edition
+# Arena Survival
 
-> Browser roguelike with instant on-chain leaderboard (10ms confirmations)
+Roguelike survival game with on-chain leaderboards on MegaETH.
 
-[![Solidity](https://img.shields.io/badge/Solidity-0.8-363636)](https://soliditylang.org/)
-[![MegaETH](https://img.shields.io/badge/MegaETH-Testnet-purple)](https://megaeth.com/)
-[![Privy](https://img.shields.io/badge/Privy-Auth-blue)](https://privy.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+**[Play Now](https://arena-megaeth.vercel.app)**
 
-Browser-based roguelike dungeon crawler with **on-chain leaderboard on MegaETH**.
+---
 
-Features instant score submissions using `eth_sendRawTransactionSync` (EIP-7966) - confirmations in <10ms.
+## What is this?
 
-## Quick Start
+A browser-based survival game where you fight endless waves of monsters. Pay 0.001 ETH to play, and if you get the highest score of the day, you win the entire prize pool.
 
-### Play (No Blockchain)
-1. Open `arena.html` in browser
-2. Works offline with localStorage
+- Turn-based roguelike gameplay
+- 40+ monster types with unique AI
+- Loot and equipment system
+- Scores recorded permanently on MegaETH
+- Daily prize pools (95% of entry fees)
 
-### Play with On-Chain Leaderboard (MetaMask)
-1. Deploy contract to MegaETH testnet (see below)
-2. Set contract address in browser: `localStorage.setItem('ARENA_CONTRACT', '0x...')`
-3. Connect MetaMask to MegaETH Testnet
-4. Play - scores submit instantly on death!
+## How to Play
 
-### Play with Privy Auth (Email/Social/Wallet)
+### Controls
 
-Privy enables login via email, Google, Twitter, Discord, or wallet - and creates embedded wallets for users who don't have one.
+| Key | Action |
+|-----|--------|
+| WASD / Arrows | Move |
+| E / Enter | Pick up item |
+| X / H / Space | Attack |
+| C / J | AOE Attack |
+| Z | Wait |
+| 1-9 | Use skills |
 
-```bash
-# Install dependencies
-npm install
+Move into enemies to attack. The game is turn-based—take your time.
 
-# Set your Privy App ID in src/App.jsx
-# Get one free at https://dashboard.privy.io
+### Goal
 
-# Run dev server
-npm run dev
+1. Survive as many waves as possible
+2. Kill monsters for points
+3. Collect loot to get stronger
+4. Top daily score wins the prize pool
 
-# Open http://localhost:3000
+## Setup
+
+### Get Testnet ETH
+
+1. Visit [testnet.megaeth.com](https://testnet.megaeth.com)
+2. Connect wallet and claim free ETH
+
+### Add MegaETH Network
+
+```
+Network: MegaETH Testnet
+Chain ID: 6343
+RPC: https://carrot.megaeth.com/rpc
+Symbol: ETH
+Explorer: megaeth-testnet.explorer.caldera.xyz
 ```
 
-## MegaETH Integration
+## Smart Contract
 
-### Chain Config
+Deployed on MegaETH Testnet (V4):
 
-| Network | Chain ID | RPC |
-|---------|----------|-----|
-| Testnet | 6343 | `https://carrot.megaeth.com/rpc` |
-| Mainnet | 4326 | `https://mainnet.megaeth.com/rpc` |
+```
+0x6023678244e0E009B751e418436871dC52378946
+```
+
+### Pay-Before-Play Flow
+
+```solidity
+// 1. Player pays 0.001 ETH to start
+function startGame() external payable;
+
+// 2. After game over, submit score (free)
+function submitScore(uint32 score, uint32 wave, uint32 kills, bytes16 name) external;
+```
+
+### Prize Distribution
+
+- 95% of entry fees → Daily prize pool
+- 5% → Platform fee
+- Top scorer at 24h epoch end wins the pool
+
+## Development
+
+```bash
+# Install
+npm install
+
+# Dev server
+npm run dev
+
+# Build
+npm run build
+```
 
 ### Deploy Contract
 
 ```bash
 cd contracts
+cp .env.example .env
+# Add your private key to .env
 
-# Set private key
-export PRIVATE_KEY=0x...
-
-# Deploy to testnet (use --skip-simulation for MegaEVM gas differences)
-forge script script/Deploy.s.sol \
+forge script script/DeployV4.s.sol \
   --rpc-url https://carrot.megaeth.com/rpc \
   --broadcast \
-  --skip-simulation
-
-# Note the deployed address
+  --gas-price 1000001 \
+  --gas-limit 150000000
 ```
 
-### Get Testnet ETH
+## Tech Stack
 
-Visit: https://faucet.timothy.megaeth.com
-
-### Contract Features (V3)
-
-- **0.001 ETH per game** - Entry fee to play
-- **24h prize epochs** - Daily prize pool for top player
-- **95% to pool, 5% house** - Fair distribution
-- **Instant receipts** - uses `eth_sendRawTransactionSync`
-- **Fixed-size leaderboard** (100 entries) - gas efficient
-- **Binary search insertion** - O(log n) position finding
-
-### Tokenomics
-
-```
-Player pays 0.001 ETH per game
-        │
-        ├── 95% → Daily Prize Pool
-        │          │
-        │          └── Top scorer at 24h mark wins the pool
-        │
-        └── 5% → House (platform fee)
-```
-
-Each 24-hour epoch:
-1. Players submit scores (0.001 ETH each)
-2. Prize pool grows throughout the day
-3. At epoch end, #1 player can claim the entire pool
-4. Leaderboard resets, new epoch begins
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         BROWSER                                  │
-├─────────────────────────────────────────────────────────────────┤
-│  arena.html                                                      │
-│    ├── ethers.js (wallet connection)                            │
-│    ├── megaeth.js (MegaETH integration)                         │
-│    └── arena.js (game logic)                                    │
-│                                                                  │
-│  On game over:                                                   │
-│    1. Check wouldMakeLeaderboard(score)                         │
-│    2. If yes → submitScore() via eth_sendRawTransactionSync     │
-│    3. Receipt in <10ms!                                         │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    MegaETH (Testnet/Mainnet)                    │
-├─────────────────────────────────────────────────────────────────┤
-│  ArenaLeaderboard.sol                                           │
-│    ├── submitScore(score, wave, kills, name)                    │
-│    ├── getTopScores(count) → Entry[]                            │
-│    ├── getPlayerBest(address) → (Entry, rank)                   │
-│    └── wouldMakeLeaderboard(score) → bool                       │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## Features
-
-- **Endless Waves** - Increasingly difficult monster spawns from all angles
-- **40+ Monster Types** - Goblins, demons, dragons with unique AI behaviors
-- **Loot System** - 5 rarity tiers (common → legendary)
-- **Dark Magic** - Spells, hexes, summons, god worship
-- **Permadeath** - Each run is unique
-- **On-Chain Leaderboard** - Scores stored on MegaETH, instant confirmation
-- **Party Mode** - 1-6 players local co-op
-- **Privy Auth** - Login with email, social, or wallet (embedded wallets for new users)
-
-## Files
-
-| File | Purpose |
-|------|---------|
-| `arena.html` | Main game page (MetaMask only) |
-| `index-privy.html` | Privy-enabled game page |
-| `src/App.jsx` | React app with Privy auth |
-| `src/privy-config.js` | Privy + MegaETH chain config |
-| `assets/arena.js` | Game loop, rendering, combat |
-| `assets/megaeth.js` | MegaETH wallet + contract integration |
-| `contracts/src/ArenaLeaderboard.sol` | On-chain leaderboard |
-| `contracts/script/Deploy.s.sol` | Deployment script |
-
-## MegaETH Optimizations Used
-
-Following [megaeth-ai-developer-skills](https://github.com/0xBreadguy/megaeth-ai-developer-skills):
-
-1. **eth_sendRawTransactionSync** - instant receipts, no polling
-2. **Fixed-size arrays** - avoids SSTORE 0→non-zero (2M+ gas)
-3. **block.timestamp late** - accessed after computation to avoid 20M gas limit
-4. **Hardcoded gas** - 0.001 gwei base fee, skip estimation
-5. **Binary search** - O(log n) leaderboard insertion
-
-## Controls
-
-| Key | Action |
-|-----|--------|
-| Arrows/numpad | Move |
-| z/Num5 | Rest |
-| a-p | Inventory |
-| 1-9 | Skills |
-| \ | Pick up |
-| >/< | Stairs |
-| w | Worship |
+- **Frontend:** React, Vite
+- **Auth:** Privy (email + wallet)
+- **Blockchain:** MegaETH (10ms blocks)
+- **Contract:** Solidity, Foundry
 
 ## License
 
 MIT
 
-## Demo
-
-Play now: Open `arena.html` in your browser (works offline!)
-
-For on-chain leaderboard, connect to MegaETH testnet.
-
 ---
 
-Built by [Exhuman](https://github.com/exhuman777) | Tiles from DCSS
+Built on [MegaETH](https://megaeth.com)
