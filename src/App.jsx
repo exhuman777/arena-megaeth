@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { PrivyProvider, usePrivy, useWallets } from '@privy-io/react-auth';
 import { privyConfig, megaethTestnet } from './privy-config';
 
-// Your Privy App ID - get from https://dashboard.privy.io
-const PRIVY_APP_ID = 'YOUR_PRIVY_APP_ID'; // TODO: Replace with your app ID
+// Your Privy App ID from https://dashboard.privy.io
+const PRIVY_APP_ID = 'cml9c6av801zil40dnl2gqnhj';
 
 function WalletStatus() {
   const { ready, authenticated, user, login, logout } = usePrivy();
