@@ -587,6 +587,8 @@ var ArenaGame = {
     this.items = [];
     this.particles = [];
     this.floatingTexts = [];
+    this.projectiles = [];
+    this.hazards = [];
     this.aoeCooldown = 0;
     this.collectedLoot = [];
     this.selectedLootIndex = -1;
@@ -625,6 +627,7 @@ var ArenaGame = {
 
   // Create ring effect
   createRingEffect: function(x, y, color, radius) {
+    if (this.particles.length >= this.MAX_PARTICLES) return;
     this.particles.push({
       x: x * this.tileSize + this.tileSize / 2,
       y: y * this.tileSize + this.tileSize / 2,
@@ -641,6 +644,7 @@ var ArenaGame = {
 
   // Create trail particle
   addTrailParticle: function(entity, color) {
+    if (this.particles.length >= this.MAX_PARTICLES) return;
     this.particles.push({
       x: entity.visualX * this.tileSize + this.tileSize / 2,
       y: entity.visualY * this.tileSize + this.tileSize / 2,
@@ -674,7 +678,7 @@ var ArenaGame = {
   },
 
   // Performance limits
-  MAX_PARTICLES: 50, // Reduced further for stability
+  MAX_PARTICLES: 80, // Enforced across ALL particle creators
   MAX_PROJECTILES: 15,
   MAX_HAZARDS: 20,
   MAX_FLOATING_TEXTS: 10,
@@ -858,6 +862,7 @@ var ArenaGame = {
 
   // Player movement trail
   addPlayerTrail: function(x, y) {
+    if (this.particles.length >= this.MAX_PARTICLES) return;
     let color = '#4af';
     if (this.buffs.speed > 0) color = '#4cf';
     if (this.buffs.strength > 0) color = '#f80';
@@ -1020,12 +1025,14 @@ var ArenaGame = {
 
   // Sword swing arc effect
   createSwingEffect: function(x, y, dx, dy) {
+    if (this.particles.length >= this.MAX_PARTICLES) return;
     let cx = x * this.tileSize + this.tileSize / 2;
     let cy = y * this.tileSize + this.tileSize / 2;
     let baseAngle = Math.atan2(dy, dx);
 
-    // Create arc of particles
-    for (let i = 0; i < 8; i++) {
+    // Create arc of particles (capped)
+    let swingCount = Math.min(8, this.MAX_PARTICLES - this.particles.length);
+    for (let i = 0; i < swingCount; i++) {
       let angle = baseAngle - 0.8 + (i / 7) * 1.6;
       let dist = 20 + Math.random() * 15;
       this.particles.push({
@@ -1042,10 +1049,11 @@ var ArenaGame = {
     }
 
     // Weapon effect color trail
-    if (this.equipment.weapon?.effect) {
+    if (this.equipment.weapon?.effect && this.particles.length < this.MAX_PARTICLES) {
       let effectColor = this.equipment.weapon.effect === 'fire' ? '#f80' :
                        this.equipment.weapon.effect === 'ice' ? '#4cf' : '#4f4';
-      for (let i = 0; i < 5; i++) {
+      let effectCount = Math.min(5, this.MAX_PARTICLES - this.particles.length);
+      for (let i = 0; i < effectCount; i++) {
         let angle = baseAngle - 0.5 + (i / 4) * 1.0;
         let dist = 25;
         this.particles.push({
@@ -1240,10 +1248,12 @@ var ArenaGame = {
 
   // Slash effect for melee hits
   createSlashEffect: function(x, y, color) {
+    if (this.particles.length >= this.MAX_PARTICLES) return;
     let cx = x * this.tileSize + this.tileSize / 2;
     let cy = y * this.tileSize + this.tileSize / 2;
-    // Create diagonal slash particles
-    for (let i = 0; i < 8; i++) {
+    // Create diagonal slash particles (capped)
+    let slashCount = Math.min(8, this.MAX_PARTICLES - this.particles.length);
+    for (let i = 0; i < slashCount; i++) {
       let angle = -Math.PI / 4 + (Math.random() - 0.5) * 0.5;
       let dist = 10 + Math.random() * 20;
       this.particles.push({
@@ -1326,13 +1336,14 @@ var ArenaGame = {
 
   // Visual chain lightning between two points
   createChainEffect: function(x1, y1, x2, y2) {
+    if (this.particles.length >= this.MAX_PARTICLES) return;
     let px1 = x1 * this.tileSize + this.tileSize / 2;
     let py1 = y1 * this.tileSize + this.tileSize / 2;
     let px2 = x2 * this.tileSize + this.tileSize / 2;
     let py2 = y2 * this.tileSize + this.tileSize / 2;
 
-    // Create chain particles along path
-    let steps = 8;
+    // Create chain particles along path (capped)
+    let steps = Math.min(8, this.MAX_PARTICLES - this.particles.length);
     for (let i = 0; i <= steps; i++) {
       let t = i / steps;
       let x = px1 + (px2 - px1) * t + (Math.random() - 0.5) * 20;
@@ -1516,32 +1527,33 @@ var ArenaGame = {
         }
       });
     }
-    // Legacy: Try MegaETH on-chain leaderboard if running standalone
+    // V4: Submit score on-chain (FREE - already paid via startGame)
     else if (typeof MegaETH !== 'undefined' && MegaETH.account && MegaETH.leaderboardAddress) {
       try {
-        this.addCombatLog('👑 Submit to chain for ' + MegaETH.ENTRY_FEE + ' ETH?', '#ff0');
-        this.addCombatLog('   20% goes to current KING!', '#f80');
+        this.addCombatLog('Submitting score on-chain...', '#4af');
         const receipt = await MegaETH.submitScore(
           this.score,
           this.difficulty,
           this.kills,
           this.playerName || 'Anon'
         );
-        this.addCombatLog('⛓️ On-chain! TX: ' + (receipt.hash || receipt.transactionHash)?.slice(0, 10) + '...', '#0f0');
+        this.addCombatLog('On-chain! TX: ' + (receipt.hash || receipt.transactionHash)?.slice(0, 10) + '...', '#0f0');
 
-        // Check if became king
+        // Check if current leader
         try {
-          const kingInfo = await MegaETH.getKingInfo();
-          if (kingInfo.king.toLowerCase() === MegaETH.account.toLowerCase()) {
-            this.addCombatLog('👑 YOU ARE THE NEW KING! 👑', '#ff0');
+          const epoch = await MegaETH.getCurrentEpoch();
+          if (epoch.currentLeader.toLowerCase() === MegaETH.account.toLowerCase()) {
+            this.addCombatLog('You are the current LEADER!', '#ff0');
           }
         } catch (e) {}
       } catch (err) {
         console.error('MegaETH submit failed:', err);
         if (err.message?.includes('user rejected')) {
-          this.addCombatLog('❌ Cancelled by user', '#888');
+          this.addCombatLog('Cancelled by user', '#888');
+        } else if (err.message?.includes('No active game')) {
+          this.addCombatLog('No active game - play without wallet or reconnect', '#f80');
         } else {
-          this.addCombatLog('⚠️ ' + (err.reason || err.message?.slice(0, 40)), '#f80');
+          this.addCombatLog((err.reason || err.message?.slice(0, 40)), '#f80');
         }
       }
     }
@@ -1858,6 +1870,7 @@ var ArenaGame = {
 
   // Spawn portal effect
   createSpawnPortal: function(x, y, color, isBoss) {
+    if (this.particles.length >= this.MAX_PARTICLES) return;
     let cx = x * this.tileSize + this.tileSize / 2;
     let cy = y * this.tileSize + this.tileSize / 2;
 
@@ -1869,8 +1882,9 @@ var ArenaGame = {
       color: color, type: 'ring'
     });
 
-    // Particles swirling in
-    for (let i = 0; i < (isBoss ? 20 : 10); i++) {
+    // Particles swirling in (capped)
+    let portalCount = Math.min(isBoss ? 20 : 10, this.MAX_PARTICLES - this.particles.length);
+    for (let i = 0; i < portalCount; i++) {
       let angle = (i / 10) * Math.PI * 2;
       let dist = 40 + Math.random() * 20;
       this.particles.push({
@@ -2119,10 +2133,12 @@ var ArenaGame = {
 
   // Create boss aura effect
   createBossAura: function(e) {
+    if (this.particles.length >= this.MAX_PARTICLES) return;
     let cx = e.x * this.tileSize + this.tileSize / 2;
     let cy = e.y * this.tileSize + this.tileSize / 2;
 
-    for (let i = 0; i < 8; i++) {
+    let auraCount = Math.min(8, this.MAX_PARTICLES - this.particles.length);
+    for (let i = 0; i < auraCount; i++) {
       let angle = (i / 8) * Math.PI * 2 + this.gameTime * 0.002;
       this.particles.push({
         x: cx + Math.cos(angle) * 25,
@@ -2235,7 +2251,7 @@ var ArenaGame = {
     let newDiff = 1 + Math.floor(this.kills / 10);
     if (newDiff > this.difficulty) {
       this.difficulty = newDiff;
-      this.spawnInterval = Math.max(600, 2500 - this.difficulty * 180);
+      this.spawnInterval = Math.max(800, 2500 - this.difficulty * 150);
 
       // Wave announcement - BIGGER
       this.addBigText(this.player.x, this.player.y - 2, `WAVE ${this.difficulty}`, '#f0f');
@@ -2605,7 +2621,8 @@ var ArenaGame = {
       if (remaining < 1500 && Math.floor(age / 150) % 2 === 0) {
         alpha = 'f';
       }
-      this.display.draw(item.x, item.y, [this.map[item.x][item.y].symbol, item.symbol], ['#0000', '#fff' + alpha]);
+      if (item.x >= 0 && item.x < this.screenWidth && item.y >= 0 && item.y < this.screenHeight && this.map[item.x] && this.map[item.x][item.y])
+        this.display.draw(item.x, item.y, [this.map[item.x][item.y].symbol, item.symbol], ['#0000', '#fff' + alpha]);
     }
 
     // Draw entities with effects
@@ -2620,7 +2637,10 @@ var ArenaGame = {
       if (e.burning > 0) flashColor = '#f804';
       if (e.poisoned > 0) flashColor = '#0f04';
       if (e.slowed > 0) flashColor = '#04f4';
-      this.display.draw(Math.round(e.visualX), Math.round(e.visualY),
+      // Use logical position for draw to prevent out-of-bounds visual coords
+      let drawX = Math.max(0, Math.min(this.screenWidth - 1, Math.round(e.visualX)));
+      let drawY = Math.max(0, Math.min(this.screenHeight - 1, Math.round(e.visualY)));
+      this.display.draw(drawX, drawY,
         [this.map[e.x][e.y].symbol, e.symbol, hpBar], ['#0000', flashColor, '#0000']);
     }
 
@@ -2635,11 +2655,15 @@ var ArenaGame = {
         if (this.buffs.shield > 0) flashColor = '#44f4';
         else if (this.buffs.strength > 0) flashColor = '#f804';
         else if (this.buffs.speed > 0) flashColor = '#4cf4';
-        this.display.draw(Math.round(this.player.visualX), Math.round(this.player.visualY),
+        let pDrawX = Math.max(0, Math.min(this.screenWidth - 1, Math.round(this.player.visualX)));
+        let pDrawY = Math.max(0, Math.min(this.screenHeight - 1, Math.round(this.player.visualY)));
+        this.display.draw(pDrawX, pDrawY,
           [this.map[this.player.x][this.player.y].symbol, this.player.symbol, hpBar], ['#0000', flashColor, '#0000']);
       } else {
         // Draw dead player (grayed out, no HP bar)
-        this.display.draw(Math.round(this.player.visualX), Math.round(this.player.visualY),
+        let pDrawX = Math.max(0, Math.min(this.screenWidth - 1, Math.round(this.player.visualX)));
+        let pDrawY = Math.max(0, Math.min(this.screenHeight - 1, Math.round(this.player.visualY)));
+        this.display.draw(pDrawX, pDrawY,
           [this.map[this.player.x][this.player.y].symbol, this.player.symbol], ['#0000', '#4448']);
       }
     }
@@ -3277,31 +3301,33 @@ var ArenaGame = {
     let statsHtml = '';
     try {
       if (typeof MegaETH !== 'undefined' && MegaETH.leaderboardAddress) {
-        const [stats, kingInfo, scores] = await Promise.all([
+        const [stats, epoch, scores] = await Promise.all([
           MegaETH.getStats(),
-          MegaETH.getKingInfo(),
+          MegaETH.getCurrentEpoch(),
           MegaETH.getTopScores(5)
         ]);
 
+        const timeLeft = MegaETH.formatTimeRemaining(epoch.timeRemaining);
         statsHtml = `
           <div style="background:#111;border:1px solid #333;border-radius:8px;padding:15px;margin:15px 0;">
             <div style="display:flex;justify-content:space-around;margin-bottom:10px;">
               <div><span style="color:#888;">Prize Pool:</span> <span style="color:#0f0;font-size:18px;">${parseFloat(stats.prizePool).toFixed(4)} ETH</span></div>
-              <div><span style="color:#888;">Total Games:</span> <span style="color:#4af;">${stats.totalGames}</span></div>
+              <div><span style="color:#888;">Games:</span> <span style="color:#4af;">${stats.totalGames}</span></div>
+              <div><span style="color:#888;">Epoch Ends:</span> <span style="color:#f0f;">${timeLeft}</span></div>
             </div>
-            ${kingInfo.king && kingInfo.king !== '0x0000000000000000000000000000000000000000' ? `
-              <div style="background:#220;border:1px solid #ff0;border-radius:4px;padding:10px;text-align:center;">
-                <div style="color:#ff0;font-size:16px;">👑 CURRENT KING 👑</div>
-                <div style="color:#fff;">${MegaETH.formatAddress(kingInfo.king)}</div>
-                <div style="color:#0f0;">Score: ${kingInfo.score} | Earned: ${parseFloat(kingInfo.earnings).toFixed(4)} ETH</div>
+            ${epoch.currentLeader && epoch.currentLeader !== '0x0000000000000000000000000000000000000000' ? `
+              <div style="background:#0a1a0a;border:1px solid #0f0;border-radius:4px;padding:10px;text-align:center;">
+                <div style="color:#0f0;font-size:16px;">CURRENT LEADER</div>
+                <div style="color:#fff;">${MegaETH.formatAddress(epoch.currentLeader)}</div>
+                <div style="color:#ff0;">Top Score: ${epoch.topScore}</div>
               </div>
-            ` : `<div style="color:#666;text-align:center;">No king yet - be the first!</div>`}
+            ` : `<div style="color:#666;text-align:center;">No scores yet - be the first!</div>`}
             ${scores.length > 0 ? `
               <div style="margin-top:10px;">
                 <div style="color:#888;font-size:11px;margin-bottom:5px;">LEADERBOARD</div>
                 ${scores.map((s, i) => `
                   <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid #222;">
-                    <span style="color:${i===0?'#ff0':'#aaa'};">${i===0?'👑':i+1+'.'} ${s.name || MegaETH.formatAddress(s.player)}</span>
+                    <span style="color:${i===0?'#ff0':'#aaa'};">${i===0?'#1':i+1+'.'} ${s.name || MegaETH.formatAddress(s.player)}</span>
                     <span style="color:#fff;">${s.score}</span>
                   </div>
                 `).join('')}
@@ -3320,14 +3346,13 @@ var ArenaGame = {
         <div style="color:#888;margin-bottom:20px;">Roguelike Survival on MegaETH</div>
 
         <div style="background:#1a0a0a;border:1px solid #f33;border-radius:8px;padding:15px;margin-bottom:15px;">
-          <div style="color:#ff0;font-size:18px;margin-bottom:10px;">👑 KING OF THE HILL 👑</div>
+          <div style="color:#0f0;font-size:18px;margin-bottom:10px;">DAILY PRIZE POOL</div>
           <div style="color:#aaa;font-size:13px;line-height:1.6;">
             Fight endless waves of monsters.<br>
-            Submit your score on-chain for <span style="color:#0f0;">0.0001 ETH</span>.<br><br>
-            <span style="color:#f80;">20% goes to the current KING</span><br>
-            <span style="color:#4af;">70% goes to the prize pool</span><br>
-            <span style="color:#888;">10% goes to the house</span><br><br>
-            <span style="color:#ff0;">Beat the king = become the king = earn from challengers!</span>
+            Pay <span style="color:#0f0;">0.001 ETH</span> to enter, submit score for free.<br><br>
+            <span style="color:#0f0;">95% goes to the daily prize pool</span><br>
+            <span style="color:#888;">5% house fee</span><br><br>
+            <span style="color:#ff0;">Top scorer at end of 24h epoch wins the entire pool!</span>
           </div>
         </div>
 
@@ -3363,7 +3388,7 @@ var ArenaGame = {
     document.getElementById('startGameBtn').addEventListener('click', async () => {
       const btn = document.getElementById('startGameBtn');
       const originalText = btn.textContent;
-      btn.textContent = '⏳ CONNECTING...';
+      btn.textContent = 'CONNECTING...';
       btn.disabled = true;
 
       try {
@@ -3371,10 +3396,27 @@ var ArenaGame = {
         if (typeof MegaETH !== 'undefined' && MegaETH.getProvider()) {
           await MegaETH.connect();
           MegaETH.updateUI();
-          overlay.remove();
-          this.startGame();
+
+          // V4: Pay entry fee via startGame() before playing
+          btn.textContent = 'PAYING 0.001 ETH...';
+          try {
+            await MegaETH.payAndStart();
+            overlay.remove();
+            this.startGame();
+          } catch (payErr) {
+            btn.textContent = originalText;
+            btn.disabled = false;
+            if (payErr.message?.includes('user rejected') || payErr.message?.includes('denied')) {
+              alert('Payment cancelled. Click again to retry or "Play without wallet"');
+            } else if (payErr.message?.includes('Already have active game')) {
+              // Already paid, just play
+              overlay.remove();
+              this.startGame();
+            } else {
+              alert('Payment failed: ' + (payErr.reason || payErr.message));
+            }
+          }
         } else {
-          // No wallet available
           btn.textContent = originalText;
           btn.disabled = false;
           alert('MetaMask not detected. Install it or click "Play without wallet"');
@@ -3385,7 +3427,6 @@ var ArenaGame = {
         btn.disabled = false;
 
         if (err.message.includes('rejected') || err.message.includes('denied')) {
-          // User cancelled - let them try again
           alert('Connection cancelled. Click again to retry or "Play without wallet"');
         } else {
           alert('Wallet error: ' + err.message);
@@ -3542,27 +3583,28 @@ var ArenaGame = {
     if (!container || typeof MegaETH === 'undefined') return;
 
     try {
-      const [scores, stats, kingInfo] = await Promise.all([
+      const [scores, stats, epoch] = await Promise.all([
         MegaETH.getTopScores(5),
         MegaETH.getStats(),
-        MegaETH.getKingInfo()
+        MegaETH.getCurrentEpoch()
       ]);
 
+      const timeLeft = MegaETH.formatTimeRemaining(epoch.timeRemaining);
       let html = `
         <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;text-align:left;">
-          <div style="color:#ff0;font-size:14px;margin-bottom:8px;text-align:center;">👑 KING OF THE HILL 👑</div>
+          <div style="color:#0f0;font-size:14px;margin-bottom:8px;text-align:center;">DAILY PRIZE POOL</div>
           <div style="display:flex;justify-content:space-around;margin-bottom:10px;font-size:11px;">
             <div><span style="color:#888;">Pool:</span> <span style="color:#0f0;">${parseFloat(stats.prizePool).toFixed(4)} ETH</span></div>
-            <div><span style="color:#888;">Games:</span> <span style="color:#4af;">${stats.totalGames}</span></div>
+            <div><span style="color:#888;">Ends:</span> <span style="color:#f0f;">${timeLeft}</span></div>
           </div>
       `;
 
-      if (kingInfo.king && kingInfo.king !== '0x0000000000000000000000000000000000000000') {
+      if (epoch.currentLeader && epoch.currentLeader !== '0x0000000000000000000000000000000000000000') {
         html += `
-          <div style="background:#220;border:1px solid #440;border-radius:4px;padding:6px;margin-bottom:8px;text-align:center;">
-            <div style="color:#ff0;font-size:12px;">Current King</div>
-            <div style="color:#fff;font-size:11px;">${MegaETH.formatAddress(kingInfo.king)}</div>
-            <div style="color:#0f0;font-size:11px;">Score: ${kingInfo.score} | Earned: ${parseFloat(kingInfo.earnings).toFixed(4)} ETH</div>
+          <div style="background:#0a1a0a;border:1px solid #0f0;border-radius:4px;padding:6px;margin-bottom:8px;text-align:center;">
+            <div style="color:#0f0;font-size:12px;">Current Leader</div>
+            <div style="color:#fff;font-size:11px;">${MegaETH.formatAddress(epoch.currentLeader)}</div>
+            <div style="color:#ff0;font-size:11px;">Score: ${epoch.topScore}</div>
           </div>
         `;
       }
@@ -3570,21 +3612,21 @@ var ArenaGame = {
       if (scores.length > 0) {
         html += `<div style="color:#888;font-size:10px;margin-bottom:4px;">TOP 5</div>`;
         scores.forEach((entry, i) => {
-          const isKing = i === 0;
+          const isLeader = i === 0;
           html += `
             <div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:1px solid #222;">
-              <span style="color:${isKing ? '#ff0' : '#888'};">${isKing ? '👑' : (i+1)+'.'} ${entry.name || MegaETH.formatAddress(entry.player)}</span>
+              <span style="color:${isLeader ? '#ff0' : '#888'};">${isLeader ? '#1' : (i+1)+'.'} ${entry.name || MegaETH.formatAddress(entry.player)}</span>
               <span style="color:#fff;">${entry.score} <span style="color:#666;">(W${entry.wave})</span></span>
             </div>
           `;
         });
       } else {
-        html += `<div style="color:#666;font-size:11px;text-align:center;">No scores yet - be the first king!</div>`;
+        html += `<div style="color:#666;font-size:11px;text-align:center;">No scores yet - be the first!</div>`;
       }
 
       html += `
           <div style="color:#666;font-size:9px;margin-top:8px;text-align:center;">
-            Entry: ${MegaETH.ENTRY_FEE} ETH → 70% pool, 20% king, 10% house
+            Entry: ${MegaETH.ENTRY_FEE} ETH | 95% prize pool, 5% house
           </div>
         </div>
       `;

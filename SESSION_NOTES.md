@@ -1,6 +1,46 @@
-# Arena Survival - Session Notes (Feb 5, 2026)
+# Arena Survival - Session Notes
 
-## What Was Done Today
+## Feb 6, 2026 - Bug Fixes & Audit
+
+### Critical Fixes Applied
+
+1. **megaeth.js pointed to WRONG contract** - Was V3 (`0x9D7eb...`), now V4 (`0x60236...`)
+2. **megaeth.js used V3 ABI** - Had `playGame()`, now has `startGame()` + `submitScore()` (V4 two-step)
+3. **No prize claiming UI** - Added `claimPrize()`, `getUnclaimedPrizes()`, `endEpoch()` to megaeth.js
+4. **arena.js showed V2 "King of the Hill"** - Updated to V4 "Daily Prize Pool" with correct fees (0.001 ETH, 95/5 split)
+5. **Game crashed at high waves** - Fixed 10 particle creation paths that bypassed MAX_PARTICLES cap
+6. **Player disappeared at high waves** - Added bounds clamping on visualX/visualY before display.draw()
+7. **restart() didn't clear projectiles/hazards** - Added cleanup for leftover state
+8. **Spawn interval too aggressive** - Raised floor from 600ms to 800ms, reduced scaling
+
+### Test Suite Created
+- 27 Foundry tests: 10 user stories + edge cases + security (reentrancy, double-submit)
+- All 27 PASS
+- File: `contracts/test/ArenaLeaderboardV4.t.sol`
+
+### V4 Game Flow (Fixed)
+1. Player clicks "Connect & Play" → wallet connects → `startGame()` pays 0.001 ETH
+2. Player plays the game
+3. Player dies → `submitScore()` sends score on-chain (FREE)
+4. After 24h epoch, winner calls `claimPrize(epochId)` to collect pool
+
+### MegaETH Gaming Research
+Documented 7 ideas for leveraging 10ms blocks:
+1. Streaming leaderboard via WebSocket (easiest, ~2hrs)
+2. Live spectator betting per wave
+3. Real-time Dutch auction item drops
+4. On-chain PvP combat (10ms = 100 ticks/sec)
+5. Fog of war with fast commit-reveal for RTS
+6. Full on-chain game state (zero servers)
+7. Microsecond timestamp oracle for precise timing
+
+See: `~/Rufus/mind/megaeth-gaming-research.md`
+
+---
+
+## Feb 5, 2026 - Initial Build
+
+### What Was Done
 
 ### 1. V4 Smart Contract - Pay-Before-Play
 - Created new contract where players pay 0.001 ETH BEFORE playing (not after)

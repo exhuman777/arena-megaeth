@@ -1,6 +1,7 @@
 /**
- * MegaETH Integration for Arena Survival V2
- * King of the Hill mechanics - pay to play, top player earns!
+ * MegaETH Integration for Arena Survival V4
+ * Pay-Before-Play: startGame() pays, submitScore() is free
+ * Daily prize pools - top player claims after 24h epoch
  * Uses eth_sendRawTransactionSync (EIP-7966) for instant receipts
  */
 
@@ -26,24 +27,28 @@ const MegaETH = {
   // Current network (default testnet)
   network: 'testnet',
 
-  // V3 Contract address - deployed to MegaETH testnet
-  leaderboardAddress: '0x9D7eb73DE7d8A309D2e10148584F623263058585',
+  // V4 Contract address - deployed to MegaETH testnet
+  leaderboardAddress: '0x6023678244e0E009B751e418436871dC52378946',
 
   // Entry fee - 0.001 ETH per game
   ENTRY_FEE: '0.001',
 
-  // V3 Contract ABI - Daily prize pool mechanics
+  // V4 Contract ABI - Pay-Before-Play with daily epochs
   leaderboardABI: [
-    'function playGame(uint32 score, uint32 wave, uint32 kills, bytes16 name) external payable',
+    'function startGame() external payable',
+    'function submitScore(uint32 score, uint32 wave, uint32 kills, bytes16 name) external',
+    'function hasActiveGame(address player) external view returns (bool)',
+    'function forfeitGame() external',
+    'function claimPrize(uint256 epochId) external',
+    'function endEpoch() external',
+    'function withdrawHouseFees() external',
     'function getTopScores(uint256 count) external view returns (tuple(address player, uint32 score, uint32 wave, uint32 kills, uint32 timestamp, bytes16 name)[])',
-    'function wouldMakeLeaderboard(uint32 score) external view returns (bool)',
-    'function getEntryFee() external pure returns (uint256)',
-    'function getStats() external view returns (uint256 prizePool, uint256 totalGames, uint256 entries, uint256 entryFee)',
     'function getCurrentEpoch() external view returns (uint256 epochId, uint256 startTime, uint256 timeRemaining, uint256 prizePool, address currentLeader, uint32 topScore)',
     'function getEpoch(uint256 epochId) external view returns (tuple(uint256 startTime, uint256 endTime, uint256 prizePool, address winner, uint32 winningScore, bool claimed))',
     'function getPlayerStats(address player) external view returns (uint256 gamesPlayed, uint256 totalEarnings, uint256 bestScoreRank)',
-    'function claimPrize(uint256 epochId) external',
-    'function endEpoch() external'
+    'function getStats() external view returns (uint256 prizePool, uint256 totalGames, uint256 entries, uint256 entryFee)',
+    'function wouldMakeLeaderboard(uint32 score) external view returns (bool)',
+    'function getEntryFee() external pure returns (uint256)'
   ],
 
   // Provider state
@@ -51,7 +56,7 @@ const MegaETH = {
   signer: null,
   contract: null,
   account: null,
-  usePrivy: false, // Flag for Privy vs MetaMask
+  usePrivy: false,
 
   /**
    * Initialize MegaETH connection
@@ -84,7 +89,7 @@ const MegaETH = {
     }
 
     console.log('MegaETH: Wallet detected', provider.isMetaMask ? 'MetaMask' : 'Other');
-    return true; // Don't auto-connect, wait for user click
+    return true;
   },
 
   /**
@@ -100,7 +105,6 @@ const MegaETH = {
       this.signer = await window.PrivyWallet.getSigner();
       this.account = window.PrivyWallet.address;
 
-      // Set up contract
       if (this.leaderboardAddress) {
         this.contract = new ethers.Contract(
           this.leaderboardAddress,
@@ -123,16 +127,13 @@ const MegaETH = {
    */
   getProvider() {
     try {
-      // If multiple wallets, find MetaMask specifically
       if (window.ethereum?.providers?.length) {
         const metamask = window.ethereum.providers.find(p => p.isMetaMask && !p.isRabby);
         if (metamask) return metamask;
       }
-      // Single wallet or MetaMask is the only one
       if (window.ethereum?.isMetaMask) {
         return window.ethereum;
       }
-      // Fallback to whatever is available
       return window.ethereum || null;
     } catch (e) {
       console.log('MegaETH: Error getting provider', e);
@@ -169,7 +170,6 @@ const MegaETH = {
    * Connect wallet (call on button click)
    */
   async connect() {
-    // Wait a bit for MetaMask to inject
     let ethereum = await this.waitForEthereum();
 
     if (!ethereum) {
@@ -177,11 +177,9 @@ const MegaETH = {
     }
 
     try {
-      // Use ethers.js BrowserProvider which handles detection better
       console.log('MegaETH: Creating BrowserProvider...');
       this.provider = new ethers.BrowserProvider(ethereum);
 
-      // This triggers the MetaMask popup
       console.log('MegaETH: Requesting accounts...');
       this.signer = await this.provider.getSigner();
       this.account = await this.signer.getAddress();
@@ -189,7 +187,6 @@ const MegaETH = {
       console.log('MegaETH: Got account', this.account);
       this.ethereum = ethereum;
 
-      // Check network
       const network = await this.provider.getNetwork();
       const chainId = Number(network.chainId);
       const targetChainId = this.config[this.network].chainId;
@@ -197,12 +194,10 @@ const MegaETH = {
 
       if (chainId !== targetChainId) {
         await this.switchNetwork();
-        // Recreate provider after switch
         this.provider = new ethers.BrowserProvider(ethereum);
         this.signer = await this.provider.getSigner();
       }
 
-      // Set up contract
       if (this.leaderboardAddress) {
         this.contract = new ethers.Contract(
           this.leaderboardAddress,
@@ -211,7 +206,6 @@ const MegaETH = {
         );
       }
 
-      // Listen for account changes
       ethereum.on('accountsChanged', (accs) => {
         this.account = accs[0];
         this.updateUI();
@@ -256,32 +250,102 @@ const MegaETH = {
     }
   },
 
+  // ============ V4 Game Flow ============
+
   /**
-   * Submit score - COSTS 0.001 ETH
-   * 95% goes to daily prize pool, 5% house fee
-   * Top player at end of 24h epoch wins the pool
+   * Step 1: Pay entry fee and start game (0.001 ETH)
+   * Must be called BEFORE playing
+   */
+  async payAndStart() {
+    if (!this.contract || !this.signer) {
+      throw new Error('Not connected to MegaETH');
+    }
+
+    const tx = await this.contract.startGame({
+      value: ethers.parseEther(this.ENTRY_FEE)
+    });
+
+    const receipt = await tx.wait();
+    console.log('MegaETH: Game started (paid)!', receipt);
+    return receipt;
+  },
+
+  /**
+   * Step 2: Submit score after game ends (FREE - already paid)
    */
   async submitScore(score, wave, kills, playerName) {
     if (!this.contract || !this.signer) {
       throw new Error('Not connected to MegaETH');
     }
 
-    // Pack player name as bytes16
     const nameBytes = ethers.encodeBytes32String(playerName.slice(0, 16)).slice(0, 34);
 
-    // Send with entry fee (0.001 ETH)
-    const tx = await this.contract.playGame(
+    const tx = await this.contract.submitScore(
       score,
       wave,
       kills,
-      nameBytes,
-      { value: ethers.parseEther(this.ENTRY_FEE) }
+      nameBytes
     );
 
     const receipt = await tx.wait();
     console.log('MegaETH: Score submitted!', receipt);
     return receipt;
   },
+
+  /**
+   * Check if player has an active (paid) game
+   */
+  async hasActiveGame(address) {
+    const cfg = this.config[this.network];
+    const iface = new ethers.Interface(this.leaderboardABI);
+    const data = iface.encodeFunctionData('hasActiveGame', [address || this.account]);
+
+    const response = await fetch(cfg.rpc, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'eth_call',
+        params: [{ to: this.leaderboardAddress, data }, 'latest'],
+        id: 1
+      })
+    });
+
+    const result = await response.json();
+    if (result.error) return false;
+
+    const decoded = iface.decodeFunctionResult('hasActiveGame', result.result);
+    return decoded[0];
+  },
+
+  /**
+   * Forfeit active game (no refund)
+   */
+  async forfeitGame() {
+    if (!this.contract) throw new Error('Not connected');
+    const tx = await this.contract.forfeitGame();
+    return await tx.wait();
+  },
+
+  /**
+   * Claim prize for a completed epoch
+   */
+  async claimPrize(epochId) {
+    if (!this.contract) throw new Error('Not connected');
+    const tx = await this.contract.claimPrize(epochId);
+    return await tx.wait();
+  },
+
+  /**
+   * Trigger epoch end (anyone can call after 24h)
+   */
+  async endEpoch() {
+    if (!this.contract) throw new Error('Not connected');
+    const tx = await this.contract.endEpoch();
+    return await tx.wait();
+  },
+
+  // ============ Read Functions ============
 
   /**
    * Get current epoch info (daily prize pool)
@@ -317,12 +381,36 @@ const MegaETH = {
   },
 
   /**
-   * Claim prize for a completed epoch
+   * Get past epoch info (for prize claiming)
    */
-  async claimPrize(epochId) {
-    if (!this.contract) throw new Error('Not connected');
-    const tx = await this.contract.claimPrize(epochId);
-    return await tx.wait();
+  async getEpoch(epochId) {
+    const cfg = this.config[this.network];
+    const iface = new ethers.Interface(this.leaderboardABI);
+    const data = iface.encodeFunctionData('getEpoch', [epochId]);
+
+    const response = await fetch(cfg.rpc, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'eth_call',
+        params: [{ to: this.leaderboardAddress, data }, 'latest'],
+        id: 1
+      })
+    });
+
+    const result = await response.json();
+    if (result.error) throw new Error(result.error.message);
+
+    const decoded = iface.decodeFunctionResult('getEpoch', result.result);
+    return {
+      startTime: Number(decoded[0][0]),
+      endTime: Number(decoded[0][1]),
+      prizePool: ethers.formatEther(decoded[0][2]),
+      winner: decoded[0][3],
+      winningScore: Number(decoded[0][4]),
+      claimed: decoded[0][5]
+    };
   },
 
   /**
@@ -387,16 +475,6 @@ const MegaETH = {
   },
 
   /**
-   * Format time remaining as HH:MM:SS
-   */
-  formatTimeRemaining(seconds) {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  },
-
-  /**
    * Get top scores from leaderboard
    */
   async getTopScores(count = 10) {
@@ -456,8 +534,44 @@ const MegaETH = {
   },
 
   /**
-   * Decode bytes16 name
+   * Check for unclaimed prizes across recent epochs
    */
+  async getUnclaimedPrizes() {
+    if (!this.account) return [];
+
+    try {
+      const epoch = await this.getCurrentEpoch();
+      const unclaimed = [];
+
+      // Check last 10 epochs
+      for (let i = Math.max(1, epoch.epochId - 10); i < epoch.epochId; i++) {
+        try {
+          const pastEpoch = await this.getEpoch(i);
+          if (pastEpoch.winner &&
+              pastEpoch.winner.toLowerCase() === this.account.toLowerCase() &&
+              !pastEpoch.claimed &&
+              parseFloat(pastEpoch.prizePool) > 0) {
+            unclaimed.push({ epochId: i, ...pastEpoch });
+          }
+        } catch (e) { /* skip invalid epochs */ }
+      }
+
+      return unclaimed;
+    } catch (e) {
+      console.error('Error checking unclaimed prizes:', e);
+      return [];
+    }
+  },
+
+  // ============ Utility Functions ============
+
+  formatTimeRemaining(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  },
+
   _decodeName(nameBytes) {
     try {
       const padded = nameBytes + '0'.repeat(66 - nameBytes.length);
@@ -467,31 +581,24 @@ const MegaETH = {
     }
   },
 
-  /**
-   * Format address for display
-   */
   formatAddress(address) {
     if (!address || address === '0x0000000000000000000000000000000000000000') return 'None';
     return address.slice(0, 6) + '...' + address.slice(-4);
   },
 
-  /**
-   * Get explorer URL for address
-   */
   getExplorerUrl(address) {
     const cfg = this.config[this.network];
     return `${cfg.explorer}/address/${address}`;
   },
 
   /**
-   * Update UI status
+   * Update UI status bar
    */
   async updateUI() {
     const status = document.getElementById('megaeth-status');
     if (!status) return;
 
     if (this.account) {
-      // Try to get epoch info
       let epochInfo = '';
       try {
         const epoch = await this.getCurrentEpoch();
@@ -501,7 +608,7 @@ const MegaETH = {
         console.log('Could not fetch epoch info:', e);
       }
 
-      status.innerHTML = `<span style="color:#0f0">● ${this.formatAddress(this.account)}</span> | <span style="color:#ff0">Fee: ${this.ENTRY_FEE} ETH</span>${epochInfo}`;
+      status.innerHTML = `<span style="color:#0f0">&bull; ${this.formatAddress(this.account)}</span> | <span style="color:#ff0">Fee: ${this.ENTRY_FEE} ETH</span>${epochInfo}`;
     } else {
       status.innerHTML = `<button onclick="MegaETH.connect().catch(e=>alert(e.message))" style="background:#f33;border:none;color:#fff;padding:4px 12px;cursor:pointer;font-family:monospace;">Connect Wallet</button> <span style="color:#888">to compete on-chain (0.001 ETH/game, daily prizes!)</span>`;
     }
