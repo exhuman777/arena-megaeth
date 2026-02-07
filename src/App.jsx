@@ -386,6 +386,9 @@ function GameDashboard() {
   const [error, setError] = useState(null);
   const [showSetup, setShowSetup] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [claimSuccess, setClaimSuccess] = useState(null);
+  const [countdown, setCountdown] = useState('--');
 
   const activeWallet = wallets?.[0];
 
@@ -435,6 +438,56 @@ function GameDashboard() {
     const interval = setInterval(fetchData, 10000); // Refresh every 10s
     return () => clearInterval(interval);
   }, [fetchData]);
+
+  // Live countdown timer
+  useEffect(() => {
+    if (!epoch) return;
+    const tick = () => {
+      const elapsed = Math.floor((Date.now() / 1000) - (epoch.startTime + (epoch.timeRemaining > 0 ? 0 : 0)));
+      const remaining = Math.max(0, epoch.timeRemaining - Math.floor((Date.now() / 1000) - (Date.now() / 1000 - epoch.timeRemaining + epoch.timeRemaining)));
+      // Simpler: just use epoch.timeRemaining and decrement locally
+      setCountdown(formatTime(Math.max(0, epoch.timeRemaining)));
+    };
+    tick();
+    // Decrement every second based on when we fetched
+    let localRemaining = epoch.timeRemaining;
+    const timer = setInterval(() => {
+      localRemaining = Math.max(0, localRemaining - 1);
+      setCountdown(formatTime(localRemaining));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [epoch]);
+
+  // Claim prize
+  const claimPrize = async () => {
+    if (!activeWallet || !epoch) return;
+    setClaiming(true);
+    setClaimSuccess(null);
+    try {
+      await activeWallet.switchChain(megaethTestnet.id);
+      const eip1193Provider = await activeWallet.getEthereumProvider();
+      const ethersProvider = new ethers.BrowserProvider(eip1193Provider);
+      const signer = await ethersProvider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+      const tx = await contract.claimPrize(epoch.id);
+      await tx.wait();
+      setClaimSuccess(`Claimed ${epoch.prizePool} ETH!`);
+      fetchData();
+    } catch (e) {
+      console.error('Claim failed:', e);
+      setError(e.message);
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  // Check if current user can claim
+  const canClaim = epoch &&
+    epoch.timeRemaining === 0 &&
+    activeWallet?.address &&
+    epoch.currentLeader?.toLowerCase() === activeWallet.address.toLowerCase() &&
+    parseFloat(epoch.prizePool) > 0;
 
   // Decode bytes16 name
   function decodeName(nameBytes) {
@@ -594,10 +647,10 @@ function GameDashboard() {
         <p style={styles.subtitle}>Roguelike survival. On-chain scores. Daily prizes.</p>
 
         <div style={styles.prizeCard}>
-          <div style={styles.prizeLabel}>PRIZE POOL</div>
+          <div style={styles.prizeLabel}>DAILY POOL · EPOCH {epoch?.id || 1}</div>
           <div style={styles.prizeAmount}>{epoch?.prizePool || '0'} ETH</div>
           <div style={styles.prizeMeta}>
-            <span>{epoch ? formatTime(epoch.timeRemaining) : '--'} left</span>
+            <span>{countdown} left</span>
             <span style={styles.separator}>·</span>
             <span>Leader: {epoch?.topScore || 0} pts</span>
           </div>
@@ -660,14 +713,32 @@ function GameDashboard() {
       </div>
 
       <div style={styles.prizeCard}>
-        <div style={styles.prizeLabel}>PRIZE POOL</div>
+        <div style={styles.prizeLabel}>DAILY POOL · EPOCH {epoch?.id || 1}</div>
         <div style={styles.prizeAmount}>{epoch?.prizePool || '0'} ETH</div>
         <div style={styles.prizeMeta}>
-          <span>Epoch {epoch?.id || 1}</span>
+          <span>{countdown} left</span>
           <span style={styles.separator}>·</span>
-          <span>{epoch ? formatTime(epoch.timeRemaining) : '--'} left</span>
+          <span>Leader: {epoch?.topScore || 0} pts ({epoch ? formatAddr(epoch.currentLeader) : '...'})</span>
         </div>
       </div>
+
+      {canClaim && (
+        <button onClick={claimPrize} disabled={claiming} style={{
+          ...styles.primaryBtn,
+          background: '#00d26a',
+          color: '#000',
+          boxShadow: '0 0 30px rgba(0,210,106,0.4)',
+          marginBottom: '16px',
+        }}>
+          {claiming ? 'CLAIMING...' : `CLAIM ${epoch.prizePool} ETH`}
+        </button>
+      )}
+
+      {claimSuccess && (
+        <div style={{ color: '#00d26a', fontSize: '13px', marginBottom: '12px', textAlign: 'center' }}>
+          {claimSuccess}
+        </div>
+      )}
 
       {playerStats && (
         <div style={styles.statsRow}>
