@@ -7,7 +7,82 @@
 ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝
 ```
 
-# Arena Survival
+<p align="center">
+  <strong>Arena Survival</strong>
+</p>
+
+<p align="center">
+  <em>Browser Roguelike with On-Chain Leaderboard on MegaETH</em>
+</p>
+
+<p align="center">
+  <a href="arena.html">Play</a> &middot;
+  <a href="leaderboard.html">Leaderboard</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/chain-MegaETH-purple" alt="MegaETH" />
+  <img src="https://img.shields.io/badge/blocks-10ms-brightgreen" alt="10ms" />
+  <img src="https://img.shields.io/badge/genre-Roguelike-blue" alt="Roguelike" />
+  <img src="https://img.shields.io/badge/auth-Privy-orange" alt="Privy" />
+</p>
+
+---
+
+**Pay 0.001 ETH to play. Highest score wins the pool.**
+
+Browser-based roguelike survival game. Explore procedurally generated dungeons, fight enemies, collect loot. Top scores written to MegaETH (10ms blocks). Daily prize pool distributed to top players.
+
+---
+
+## File Map
+
+```
+  arena-megaeth/
+  AGENTS.md
+  CHANGELOG.md
+  CLAUDE.md
+  PROMO.md
+  README.md
+  SESSION_NOTES.md
+  about.html
+  admin.html
+  arena-game.html
+  arena.html
+  build-neocities.sh
+  generate-icons.html
+  guides.html
+  help.css
+  help.html
+  hub.html
+  index-old.html
+  index.html
+  indexextreme.html
+  leaderboard.html
+  manifest.json
+  package-lock.json
+  package.json
+  party-game.html
+  party.html
+  promo.html
+  styles.css
+  sw.js
+  vite.config.js
+  assets/
+    arena.js
+    config.js
+    configextreme.js
+    entities.js
+    entity.js
+    icon-192.png
+    icon-512.png
+    index.js
+    item.js
+    items.js
+  ... (6738 more files)
+```
+
+---
 
 Roguelike survival game with on-chain leaderboards on MegaETH.
 
